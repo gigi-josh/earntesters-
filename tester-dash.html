@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnTesters - Available Testing Tasks</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* EarnTesters Specific Styles */
+        :root {
+            --et-primary: #764ba2;
+            --et-secondary: cornflowerblue;
+        }
+        
+        body {
+            background: #f8fafc;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        /* Header */
+        .et-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 10px 0;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .et-header .container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .et-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .et-logo span {
+            color: #764ba2;
+        }
+        
+        .balance {
+            color: cornflowerblue;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        
+        .et-nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .et-nav a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .et-nav a:hover {
+            color: var(--et-primary);
+        }
+        
+        .avatar {
+            min-width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--et-primary), var(--et-secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        /* Main Layout */
+        .et-main {
+            padding: 40px 0;
+        }
+        
+        .et-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Welcome Section */
+        .welcome-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .welcome h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .welcome p {
+            color: #666;
+        }
+        
+        .quick-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat-badge {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            text-align: center;
+        }
+        
+        .stat-badge .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--et-primary);
+        }
+        
+        .stat-badge .label {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* Filter Bar */
+        .filter-bar {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+        
+        .filter-select {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 150px;
+            background: white;
+        }
+        
+        .search-box {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .search-box input {
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .filter-button {
+            background: var(--et-primary);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100px;
+        }
+        
+        .filter-button:hover {
+            opacity: 0.9;
+        }
+        
+        /* Tasks Grid */
+        .tasks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .task-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .task-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .task-header {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+        }
+        
+        .task-category {
+            background: #f0e6fa;
+            color: var(--et-primary);
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .task-pay {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--et-primary);
+        }
+        
+        .task-pay small {
+            font-size: 14px;
+            color: #999;
+            font-weight: normal;
+        }
+        
+        .task-body {
+            padding: 20px;
+        }
+        
+        .task-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .task-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #888;
+            flex-wrap: wrap;
+        }
+        
+        .task-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .task-footer {
+            padding: 15px 20px;
+            background: #fafafa;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .spots-left {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .spots-left strong {
+            color: var(--et-primary);
+        }
+        
+        .task-button {
+            background: var(--et-primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .task-button:hover {
+            opacity: 0.9;
+        }
+        
+        .task-button.secondary {
+            background: transparent;
+            color: var(--et-primary);
+            border: 1px solid var(--et-primary);
+        }
+        
+        /* Featured Section */
+        .featured-section {
+            margin-bottom: 40px;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-header h2 {
+            font-size: 20px;
+            color: #333;
+        }
+        
+        .view-all {
+            color: var(--et-primary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        /* How it works */
+        .how-it-works {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .how-it-works h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .step-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .step-number {
+            width: 30px;
+            height: 30px;
+            background: #f0e6fa;
+            color: var(--et-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .step-text h4 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .step-text p {
+            font-size: 14px;
+            color: #666;
+        }
+        footer {
+            text-align: center;
+            background: linear-gradient(90deg, cornflowerblue, #764ba2);
+            color: white;
+            font-weight: bold;
+            padding: 20px 0;
+        }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .welcome-section {
+                flex-direction: column;
+                align-items: start;
+            }
+            
+            .quick-stats {
+                width: 100%;
+            }
+            
+            .stat-badge {
+                flex: 1;
+            }
+            
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+            
+            .tasks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="et-header">
+        <div class="container">
+            <div class="header-top">
+                <a href="tester.html" class="et-logo">Earn<span>Testers</span></a>
+                <div class="balance">$42.50</div>
+            </div>
+            <nav class="et-nav">
+                <a href="dashboard.html">Browse Tasks</a>
+                <a href="my-tasks.html">My Tasks</a>
+                <a href="earnings.html">Earnings</a>
+                <a href="profile.html" class="avatar">J</a>
+            </nav>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="et-main">
+        <div class="et-container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <div class="welcome">
+                    <h1>Available Testing Tasks</h1>
+                    <p>Find bugs, test features, earn money</p>
+                </div>
+                
+                <div class="quick-stats">
+                    <div class="stat-badge">
+                        <div class="number">12</div>
+                        <div class="label">Available</div>
+                    </div>
+                    <div class="stat-badge">
+                        <div class="number">143</div>
+                        <div class="label">Testers Online</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <select class="filter-select">
+                    <option>All Categories</option>
+                    <option>Websites</option>
+                    <option>Mobile Apps</option>
+                    <option>Games</option>
+                    <option>UI/Design</option>
+                </select>
+                
+                <select class="filter-select">
+                    <option>Any Device</option>
+                    <option>Desktop Only</option>
+                    <option>Mobile Only</option>
+                    <option>Tablet</option>
+                </select>
+                
+                <select class="filter-select">
+                    <option>Sort by: Newest</option>
+                    <option>Highest Pay</option>
+                    <option>Most Spots Left</option>
+                </select>
+                
+                <div class="search-box">
+                    <input type="text" placeholder="Search tasks...">
+                    <button class="filter-button">Filter</button>
+                </div>
+            </div>
+            
+            <!-- Featured Tasks Section -->
+            <div class="featured-section">
+                <div class="section-header">
+                    <h2>⭐ Featured Tasks</h2>
+                    <a href="#" class="view-all">View all →</a>
+                </div>
+                
+                <div class="tasks-grid">
+                    <!-- Task Card 1 -->
+                    <div class="task-card">
+                        <div class="task-header">
+                            <span class="task-category">Website Testing</span>
+                            <span class="task-pay">$0.20 <small>per bug</small></span>
+                        </div>
+                        <div class="task-body">
+                            <h3 class="task-title">E-commerce Checkout Flow</h3>
+                            <p class="task-description">Test the complete checkout process on a fashion store. Find any bugs in payment, cart, or order confirmation.</p>
+                            <div class="task-meta">
+                                <span>🖥️ Desktop</span>
+                                <span>📱 Mobile</span>
+                                <span>⏱️ 15 min</span>
+                            </div>
+                        </div>
+                        <div class="task-footer">
+                            <span class="spots-left"><strong>12 spots</strong> left</span>
+                            <button class="task-button">Start Testing</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Card 2 -->
+                    <div class="task-card">
+                        <div class="task-header">
+                            <span class="task-category">Mobile App</span>
+                            <span class="task-pay">$2.00 <small>flat</small></span>
+                        </div>
+                        <div class="task-body">
+                            <h3 class="task-title">Fitness Tracker App</h3>
+                            <p class="task-description">Test the workout logging feature. Check if steps sync correctly and progress saves properly.</p>
+                            <div class="task-meta">
+                                <span>📱 Android</span>
+                                <span>📱 iPhone</span>
+                                <span>⏱️ 20 min</span>
+                            </div>
+                        </div>
+                        <div class="task-footer">
+                            <span class="spots-left"><strong>8 spots</strong> left</span>
+                            <button class="task-button">Start Testing</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Card 3 -->
+                    <div class="task-card">
+                        <div class="task-header">
+                            <span class="task-category">UI/UX Feedback</span>
+                            <span class="task-pay">$1.00 <small>flat</small></span>
+                        </div>
+                        <div class="task-body">
+                            <h3 class="task-title">Restaurant Menu Redesign</h3>
+                            <p class="task-description">Review new menu design. Is it easy to find items? Rate the layout and suggest improvements.</p>
+                            <div class="task-meta">
+                                <span>🖥️ Any</span>
+                                <span>📋 Survey</span>
+                                <span>⏱️ 10 min</span>
+                            </div>
+                        </div>
+                        <div class="task-footer">
+                            <span class="spots-left"><strong>25 spots</strong> left</span>
+                            <button class="task-button">Start Testing</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Regular Tasks Section -->
+            <div class="section-header">
+                <h2>📋 All Available Tasks</h2>
+            </div>
+            
+            <div class="tasks-grid">
+                <!-- Task Card 4 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <span class="task-category">Website</span>
+                        <span class="task-pay">$0.09 <small>per bug</small></span>
+                    </div>
+                    <div class="task-body">
+                        <h3 class="task-title">Real Estate Listing Site</h3>
+                        <p class="task-description">Test property search filters. Check if location, price, and bedroom filters work correctly.</p>
+                        <div class="task-meta">
+                            <span>🖥️ Desktop</span>
+                            <span>⏱️ 10 min</span>
+                        </div>
+                    </div>
+                    <div class="task-footer">
+                        <span class="spots-left"><strong>6 spots</strong> left</span>
+                        <button class="task-button">Start Testing</button>
+                    </div>
+                </div>
+                
+                <!-- Task Card 5 -->
+                <div class="task-card">
+                    <div class="task-header">
+                        <span class="task-category">Game Testing</span>
+                        <span class="task-pay">$2.00 <small>flat</small></span>
+                    </div>
+                    <div class="task-body">
+                        <h3 class="task-title">Puzzle Game - Level 5</h3>
+                        <p class="task-description">Play through level 5 and report any glitches, crashes, or confusing mechanics.</p>
+                        <div class="task-meta">
+                            <span>📱 Android</span>
+                            <span>⏱️ 25 min</span>
+                        </div>
+                    </div>
+                    <div class="task-footer">
+                        <span class="spots-left"><strong>4 spots</strong> left</span>
+                        <button class="task-button">Start testing </button>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        &copy 2026 JoshGG. All rights reserved 
+    </footer>
+    <script src="tester-dash.js"></script>
+</body>
+</html>
