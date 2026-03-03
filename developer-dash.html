@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Dashboard - EarnTesters</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:Arial,sans-serif;background:#f5f5f5;}
+        .header{
+            background:#fff;padding:15px 20px;
+            box-shadow:0 2px 5px rgba(0,0,0,0.1);
+            display:flex;justify-content:space-between;
+        }
+        .logo{font-size:24px;font-weight:bold;text-decoration:none;color:#333;}
+        .logo span{color:#667eea;}
+        .balance{background:#e3f2fd;padding:5px 15px;border-radius:20px;}
+        .container{max-width:1200px;margin:20px auto;padding:0 20px;}
+        .grid-2{display:grid;grid-template-columns:2fr 1fr;gap:20px;}
+        .card{background:#fff;border-radius:10px;padding:20px;margin-bottom:20px;}
+        .card h2{font-size:18px;margin-bottom:15px;}
+        input,select,textarea{
+            width:100%;padding:10px;margin-bottom:15px;
+            border:1px solid #ddd;border-radius:5px;
+        }
+        .row{display:flex;gap:10px;align-items:center;}
+        .preview{font-size:40px;background:#f5f5f5;padding:5px 15px;border-radius:5px;}
+        .btn{
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:#fff;border:none;padding:12px;width:100%;
+            border-radius:5px;cursor:pointer;
+        }
+        .app-item{
+            display:flex;align-items:center;gap:10px;
+            padding:10px;background:#f8f9fa;border-radius:5px;
+            margin-bottom:10px;
+        }
+        .app-icon{width:40px;height:40px;font-size:24px;text-align:center;}
+        .app-icon img{width:40px;height:40px;object-fit:contain;}
+        .status{
+            padding:2px 8px;border-radius:12px;font-size:12px;
+        }
+        .status.active{background:#d4edda;color:#155724;}
+        .bug-item{
+            padding:10px;border-left:4px solid #ff6b6b;
+            background:#f8f9fa;margin-bottom:10px;font-size:14px;
+        }
+        .upload-area{
+            border:2px dashed #667eea;padding:20px;text-align:center;
+            border-radius:5px;margin-bottom:15px;cursor:pointer;
+        }
+        .upload-area:hover{background:#f5f5f5;}
+        .screenshot-preview{
+            max-width:100%;max-height:150px;margin-top:10px;
+            border-radius:5px;display:none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="/" class="logo">Earn<span>Testers</span></a>
+        <div class="balance">$12.50</div>
+    </div>
+
+    <div class="container">
+        <div class="grid-2">
+            <!-- Left: Post New App -->
+            <div>
+                <div class="card">
+                    <h2>📱 Post New App</h2>
+                    
+                    <input type="text" placeholder="App Name" id="appName">
+                    <input type="text" placeholder="Category" id="category">
+                    
+                    <div class="row">
+                        <input type="text" placeholder="Icon (emoji or filename)" id="icon" value="📱">
+                        <div class="preview" id="iconPreview">📱</div>
+                    </div>
+
+                    <!-- Screenshot Upload -->
+                    <div class="upload-area" onclick="document.getElementById('screenshot').click()">
+                        <input type="file" id="screenshot" accept="image/*" style="display:none;">
+                        <span style="font-size:24px;">📸</span>
+                        <p>Click to upload screenshot</p>
+                    </div>
+                    <img id="preview" class="screenshot-preview">
+                    
+                    <select id="viewType">
+                        <option>Select View screen</option>
+                        <option>Android</option>
+                        <option>iOS</option>
+                        <option>Desktop (Windows)</option>
+                        <option>Desktop (Mac)</option>
+                    </select>
+                    
+                    <select id="payType">
+                        <option>$2.00 flat</option>
+                        <option>$0.15 per bug</option>
+                    </select>
+                    
+                    <select id="type">
+                        <option value="">Select type</option>
+                        <option value="Mobile App">Mobile App</option>
+                        <option value="Web App">Web App</option>
+                        <option value="Website">Website</option>
+                        <option value="Mobile Game">Mobile Game</option>
+                    </select>
+                    
+                    <!-- URL field (hidden by default, shown when Website selected) -->
+                    <div id="urlField" style="display:none;">
+                        <input type="text" id="app-url" placeholder="Website URL (e.g., https://example.com)">
+                    </div>
+                    
+                    <textarea rows="3" placeholder="Test Focus (one per line)" id="testFocus"></textarea>
+                    
+                    <button class="btn" onclick="postApp()">Post App for Testing →</button>
+                </div>
+
+                <!-- My Apps -->
+                <div class="card">
+                    <h2>📋 My Apps</h2>
+                    <div id="myApps">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Right: Bug Reports -->
+            <div>
+                <div class="card">
+                    <h2>🐛 Bug Reports</h2>
+                    <div id="bugReports">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/hide URL field based on type selection
+        document.getElementById('type').addEventListener('change', function(e) {
+            const urlField = document.getElementById('urlField');
+            if (e.target.value === 'Website') {
+                urlField.style.display = 'block';
+            } else {
+                urlField.style.display = 'none';
+            }
+        });
+
+        // Convert image to base64
+        document.getElementById('screenshot').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Store base64 in global
+                window.screenshotBase64 = e.target.result;
+                // Show preview
+                document.getElementById('preview').src = e.target.result;
+                document.getElementById('preview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Icon preview
+        document.getElementById('icon').addEventListener('input', function(e) {
+            document.getElementById('iconPreview').innerHTML = e.target.value || '📱';
+        });
+
+        // Post new app to server array
+        async function postApp() {
+            const name = document.getElementById('appName').value;
+            const type = document.getElementById('type').value;
+            const appUrl = document.getElementById('app-url').value;
+            if(!name) return alert('Enter app name');
+            if(!type) return alert('Select app type');
+            
+            const appData = {
+                name: name,
+                category: document.getElementById('category').value,
+                icon: document.getElementById('icon').value,
+                pay: document.getElementById('payType').value,
+                testFocus: document.getElementById('testFocus').value.split('\n').filter(f => f.trim()),
+                screenshot: window.screenshotBase64 || null,
+                developer: 'Demo Developer',
+                type: type,
+                platform: document.getElementById('viewType').value,
+                url: type === 'Website' ? appUrl : null
+            };
+            
+            try {
+                const response = await fetch('/api/test', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(appData)
+                });
+                
+                const savedApp = await response.json();
+                
+                // Reload apps
+                loadApps();
+                
+                // Clear form
+                document.getElementById('appName').value = '';
+                document.getElementById('category').value = '';
+                document.getElementById('icon').value = '📱';
+                document.getElementById('iconPreview').innerHTML = '📱';
+                document.getElementById('testFocus').value = '';
+                document.getElementById('type').value = '';
+                document.getElementById('urlField').style.display = 'none';
+                document.getElementById('app-url').value = '';
+                document.getElementById('preview').style.display = 'none';
+                window.screenshotBase64 = null;
+                
+                alert(`App posted! ID: ${savedApp.id}`);
+            } catch (error) {
+                console.error('Post error:', error);
+                alert('Error posting app: ' + error.message);
+            }
+        }
+
+        // Load apps on page load
+        async function loadApps() {
+            console.log('Trying to fetch apps from backend');
+            try {
+                console.log('Fetching from /test...')
+                
+                const response = await fetch('/test');
+                console.log('response status:', response.status);
+                
+                if (!response.ok) throw new Error('HTTP error: ' + response.status);
+                
+                const apps = await response.json();
+                console.log('Apps ready:', apps);
+                
+                const container = document.getElementById('myApps');
+                container.innerHTML = '';
+                
+                if (apps.length === 0) {
+                    container.innerHTML = '<p style="color:#999;text-align:center;">No apps yet</p>';
+                    return;
+                }
+                
+                apps.forEach(app => {
+                    const div = document.createElement('div');
+                    div.className = 'app-item';
+                    
+                    // Handle icon display
+                    let iconHtml = app.icon;
+                    if (app.icon && app.icon.includes('.')) {
+                        iconHtml = `<img src="${app.icon}" alt="${app.name}">`;
+                    }
+                    
+                    // Add URL badge if website
+                    const urlBadge = app.url ? `<br><span style="font-size:11px;color:#1976d2;">🔗 ${app.url}</span>` : '';
+                    
+                    div.innerHTML = `
+                        <div class="app-icon">${iconHtml}</div>
+                        <div style="flex:1">
+                            <strong>${app.name}</strong><br>
+                            <span style="font-size:13px;color:#666;">${app.category || 'Uncategorized'} • ${app.pay || '$0.00'}</span>
+                            ${urlBadge}
+                        </div>
+                        <span class="status active">${app.type || 'App'}</span>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Failed to load apps:', error);
+                document.getElementById('myApps').innerHTML = '<p style="color:red;">Error loading apps</p>';
+            }
+        }
+
+        // Load bugs
+        async function loadBugs() {
+            try {
+                const response = await fetch('/api/bugs');
+                const bugs = await response.json();
+                
+                const container = document.getElementById('bugReports');
+                container.innerHTML = '';
+                
+                if (bugs.length === 0) {
+                    container.innerHTML = '<p style="color:#999;text-align:center;">No bug reports yet</p>';
+                    return;
+                }
+                
+                bugs.forEach(bug => {
+                    const div = document.createElement('div');
+                    div.className = 'bug-item';
+                    div.innerHTML = `
+                        <strong>${bug.title}</strong><br>
+                        <span style="font-size:12px;color:#666;">App ID: ${bug.appId} • ${new Date(bug.createdAt).toLocaleString()}</span>
+                        ${bug.screenshot ? '<br><span style="font-size:11px;color:#1976d2;">📸 Screenshot attached</span>' : ''}
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Failed to load bugs:', error);
+                document.getElementById('bugReports').innerHTML = '<p style="color:red;">Error loading bugs</p>';
+            }
+        }
+
+        // Load data on startup
+        loadApps();
+        loadBugs();
+    </script>
+</body>
+</html>
