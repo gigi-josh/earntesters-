@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - EarnTesters Creative Studio</title>
+    <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body > *:not(.mission) {
+      padding: 0 10px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .page-header {
+        padding: 40px;
+        text-align: center;
+        margin-bottom: 55px;
+    }
+
+    .page-header h1 {
+        font-size: 48px;
+        color: #667eea;
+    }
+
+    .page-header p {
+        font-size: 20px;
+        color: #666;
+        max-width: 700px;
+        margin: 20px auto 0;
+    }
+
+    .mission {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .mission h2 {
+        font-size: 36px;
+        margin-bottom: 30px;
+    }
+
+    .mission p {
+        font-size: 17px;
+        max-width: 800px;
+        margin: 0 auto;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+
+    .story {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .story-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    .story-content h2 {
+        font-size: 32px;
+        margin-bottom: 20px;
+        color: #000;
+    }
+
+    .story-content p {
+        margin-bottom: 20px;
+        color: #555;
+        line-height: 1.8;
+    }
+
+    .story-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        background: #f9f9f9;
+        padding: 40px;
+        border-radius: 20px;
+    }
+
+    .stat {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 36px;
+        font-weight: bold;
+        color: #667eea;
+        margin-bottom: 5px;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .team {
+        padding: 80px 0;
+        background: #f9f9f9;
+        margin-bottom: 31px;
+        text-align: center;
+    }
+
+    .team h3 {
+        font-size: 24px;
+        margin: 20px 0 5px;
+        color: #000;
+    }
+
+    .team-title {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .team p {
+        color: #666;
+        line-height: 1.6;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .section-title {
+        font-size: 36px;
+        text-align: center;
+        margin-bottom: 40px;
+        color: #000;
+    }
+
+    .values {
+        padding: 80px 0;
+        background: white;
+    }
+
+    .values-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .value-card {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .value-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+
+    .value-card h3 {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: #000;
+    }
+
+    .value-card p {
+        color: #666;
+        line-height: 1.6;
+    }
+
+    .cta-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 80px 0;
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        font-size: 36px;
+        margin-bottom: 20px;
+    }
+
+    .cta-section p {
+        font-size: 18px;
+        max-width: 600px;
+        margin: 0 auto 30px;
+        opacity: 0.9;
+    }
+
+    .cta-button {
+        padding: 10px;
+        color: #667eea;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid white;
+    }
+
+    .cta-button:hover {
+        background: #667eea;
+        color: black;
+    }
+
+    footer {
+        background: #333;
+        color: white;
+        padding: 40px 0;
+        text-align: center;
+    }
+
+    footer a {
+        color: #667eea;
+        text-decoration: none;
+        margin: 0 10px;
+    }
+
+    footer a:hover {
+        text-decoration: underline;
+    }
+
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 36px;
+        }
+        
+        .story-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+        
+        .story-stats {
+            order: -1;
+        }
+        
+        .values-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .cta-button {
+            display: block;
+            margin: 10px auto;
+            max-width: 200px;
+        }
+    }
+    </style>
+</head>
+<body>
+    <section class="page-header">
+        <div class="container">
+            <h1>Building digital experiences that matter</h1>
+            <p>We're a creative studio on a mission to bridge the gap between beautiful design and real-world functionality.</p>
+        </div>
+    </section>
+    
+    <section class="mission">
+        <div class="container">
+            <h2>Our Mission</h2>
+            <p>To create digital products that don't just look good—they actually work. And to give everyday people a seat at the table by paying them to shape the apps and websites they use.</p>
+        </div>
+    </section>
+    
+    <section class="story">
+        <div class="container">
+            <div class="story-grid">
+                <div class="story-content">
+                    <h2>The EarnTesters Story</h2>
+                    <p>EarnTesters started with a simple frustration: too many agencies build beautiful websites that break the moment real users touch them. Fancy designs that confuse customers. "Perfect" apps that crash on actual devices.</p>
+                    <p>We realized the missing piece was <strong>real human testing</strong>. Not QA teams in bubbles, but everyday people using products the way they naturally would.</p>
+                    <p>So we built a studio that does both: we create stunning designs AND we test them with real people before they launch. That evolved into EarnTesters—a platform that pays regular people to do what they already do: use apps and share honest feedback.</p>
+                    <p>Today, we're part creative agency, part testing community. Same mission. Same obsession with quality. <strong>We also help developers and businesses publish their apps on major platforms—available for sale at a price—so they can start generating revenue immediately.</strong></p>
+                </div>
+                
+                <div class="story-stats">
+                    <div class="stat">
+                        <div class="stat-number">2026</div>
+                        <div class="stat-label">Founded</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Testers</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Projects</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Real Humans</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="team">
+        <div class="container">
+            <h2 class="section-title">Meet the Team</h2>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <div style="width: 160px; height: 160px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 48px;">👨‍💻</div>
+                <a href="team.html" style="cursor: pointer; color: #667eea; text-decoration: none;">View All Team →</a>
+                <h3>Josh</h3>
+                <p class="team-title">Founder & Creative Director</p>
+                <p style="font-style: italic; color: darkgray; max-width: 600px;">Designer, developer, and believer that great products are built WITH users, not just FOR them. Started EarnTesters to prove that quality and community can coexist.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="values">
+        <div class="container">
+            <h2 class="section-title">What We Stand For</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🎯</div>
+                    <h3>Real Feedback</h3>
+                    <p>No fake reviews. No manufactured data. Just honest opinions from real humans.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">💰</div>
+                    <h3>Fair Pay</h3>
+                    <p>If users create value for us, we share that value with them. Always.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🔍</div>
+                    <h3>Radical Transparency</h3>
+                    <p>We show exactly how payments work, where data goes, and why we make decisions.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🚀</div>
+                    <h3>Quality First</h3>
+                    <p>For our clients and our testers—we refuse to cut corners.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="values" style="padding-top: 0;">
+        <div class="container">
+            <h2 class="section-title">Publish & Profit</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">📱</div>
+                    <h3>App Store Publishing</h3>
+                    <p>We handle the entire submission process to get your app on Apple's App Store and Google Play.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">💵</div>
+                    <h3>Set Your Price</h3>
+                    <p>Whether you want to offer your app for free, at a one-time purchase price, or with subscriptions—the choice is yours.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">📈</div>
+                    <h3>Revenue Generation</h3>
+                    <p>Start earning from day one. We help you monetize your app so you can focus on what you do best—building great products.</p>
+                </div>
+                
+                <div class="value-card">
+                    <div class="value-icon">🌍</div>
+                    <h3>Global Distribution</h3>
+                    <p>Reach millions of users worldwide. We help you publish in multiple countries and currencies.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="cta-section">
+        <div class="container">
+            <h2>Join the community</h2>
+            <p style="font-style: italic; font-size: 16px; color: #fff;">Whether you want to build something amazing, publish your app for sale, or get paid to test—we'd love to have you.</p>
+            
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <p>© 2026 JoshGG. All rights reserved.</p>
+            <p style="margin-top: 10px;">
+                <a href="#">Privacy</a>
+                <a href="#">Terms</a>
+                <a href="mailto:hello@joshgg.com">Contact</a>
+            </p>
+        </div>
+    </footer>
+</body>
+</html>
