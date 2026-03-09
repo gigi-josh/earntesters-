@@ -5,197 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Testing Environment - EarnTesters</title>
   <link rel="stylesheet" href="t-environment.css">
-  <style>
-    /* Ad Banner Styles */
-    .ad-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      animation: fadeIn 0.3s ease;
-    }
-    
-    .ad-container {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 600px;
-      width: 90%;
-      text-align: center;
-      color: white;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      position: relative;
-      animation: slideUp 0.5s ease;
-    }
-    
-    .ad-logo {
-      font-size: 48px;
-      margin-bottom: 20px;
-      animation: bounce 2s infinite;
-    }
-    
-    .ad-title {
-      font-size: 32px;
-      margin-bottom: 15px;
-      font-weight: bold;
-    }
-    
-    .ad-description {
-      font-size: 18px;
-      margin-bottom: 30px;
-      opacity: 0.9;
-    }
-    
-    .ad-timer {
-      font-size: 48px;
-      font-weight: bold;
-      margin: 20px 0;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-    
-    .ad-progress-bar {
-      width: 100%;
-      height: 10px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 5px;
-      margin: 20px 0;
-      overflow: hidden;
-    }
-    
-    .ad-progress-fill {
-      height: 100%;
-      background: #4CAF50;
-      width: 0%;
-      transition: width 1s linear;
-      border-radius: 5px;
-    }
-    
-    .ad-skip-btn {
-      background: transparent;
-      color: white;
-      border: 2px solid white;
-      padding: 12px 40px;
-      border-radius: 50px;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: not-allowed;
-      opacity: 0.5;
-      transition: all 0.3s ease;
-      margin-top: 20px;
-    }
-    
-    .ad-skip-btn.enabled {
-      background: white;
-      color: #764ba2;
-      cursor: pointer;
-      opacity: 1;
-      animation: pulse 1.5s infinite;
-    }
-    
-    .ad-skip-btn.enabled:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 20px rgba(255,255,255,0.3);
-    }
-    
-    .ad-offer {
-      background: rgba(255,255,255,0.2);
-      padding: 15px;
-      border-radius: 10px;
-      margin: 20px 0;
-      font-size: 16px;
-    }
-    
-    .main-content {
-      filter: blur(0);
-      transition: filter 0.3s ease;
-    }
-    
-    .main-content.blurred {
-      filter: blur(5px);
-      pointer-events: none;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    
-    @keyframes slideUp {
-      from {
-        transform: translateY(50px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-    
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-20px); }
-    }
-    
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    
-    /* Sponsor badge */
-    .sponsored-badge {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255,255,255,0.2);
-      padding: 5px 15px;
-      border-radius: 20px;
-      font-size: 12px;
-      letter-spacing: 1px;
-    }
-    
-    /* Countdown animation */
-    .timer-pulse {
-      animation: timerPulse 1s infinite;
-    }
-    
-    @keyframes timerPulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-  </style>
 </head>
 <body>
     <!-- Ad Banner Overlay -->
     <div id="adOverlay" class="ad-overlay">
         <div class="ad-container">
             <div class="sponsored-badge">SPONSORED</div>
-            <div class="ad-logo">🚀</div>
-            <h1 class="ad-title">Supercharge Your Testing!</h1>
-            <p class="ad-description">Join our premium tester community and earn up to 3x more</p>
+            <div class="ad-timer" id="timer">35s</div>
             
-            <div class="ad-offer">
-                ⚡ Special Offer: First month 50% OFF ⚡
-            </div>
+            <!-- Video Ad from VAST -->
+            <video id="vast-video" class="ad-video" autoplay muted playsinline>
+                <source src="https://www.silent-basis.pro/152327/199276/559473_8cefa.mp4" type="video/mp4">
+                <source src="https://www.silent-basis.pro/152327/199276/559473_8cefaz.webm" type="video/webm">
+                Your browser doesn't support video.
+            </video>
             
-            <div class="ad-timer" id="timer">20s</div>
-            
-            <div class="ad-progress-bar">
-                <div class="ad-progress-fill" id="progressFill"></div>
-            </div>
-            
-            <button class="ad-skip-btn" id="skipBtn" onclick="skipAd()" disabled>Skip Ad (5s)</button>
-            
-            <p style="font-size: 14px; margin-top: 20px; opacity: 0.7;">
-                Your task will begin automatically after the ad
-            </p>
+            <button class="ad-skip-btn" id="skipBtn" onclick="skipAd()" disabled>Skip Ad (15s)</button>
         </div>
     </div>
 
@@ -375,38 +200,30 @@
     
     <script>
         // Ad Timer Logic
-        let timeLeft = 20;
+        let timeLeft = 35; // 35 seconds duration from VAST
         let skipEnabled = false;
         const timerElement = document.getElementById('timer');
         const skipBtn = document.getElementById('skipBtn');
-        const progressFill = document.getElementById('progressFill');
         const adOverlay = document.getElementById('adOverlay');
         const mainContent = document.getElementById('mainContent');
-        
-        // Update progress bar width
-        function updateProgress() {
-            const percentage = ((20 - timeLeft) / 20) * 100;
-            progressFill.style.width = percentage + '%';
-        }
+        const video = document.getElementById('vast-video');
         
         // Countdown timer
         const timer = setInterval(() => {
             timeLeft--;
             timerElement.textContent = timeLeft + 's';
-            updateProgress();
             
-            // Enable skip button at 15 seconds (5 seconds remaining)
-            if (timeLeft === 15) {
+            // Enable skip button after 15 seconds (as per VAST skipoffset)
+            if (timeLeft === 20) { // 35-15 = 20 seconds remaining
                 skipEnabled = true;
                 skipBtn.disabled = false;
                 skipBtn.classList.add('enabled');
-                skipBtn.textContent = 'Skip Ad (5s)';
                 timerElement.classList.add('timer-pulse');
             }
             
             // Update skip button text
-            if (timeLeft <= 15 && timeLeft > 0) {
-                skipBtn.textContent = `Skip Ad (${timeLeft - 15}s)`;
+            if (timeLeft <= 20 && timeLeft > 0) {
+                skipBtn.textContent = `Skip Ad (${timeLeft - 20}s)`;
             }
             
             // When timer reaches 0
@@ -415,6 +232,11 @@
                 closeAd();
             }
         }, 1000);
+        
+        // When video ends naturally
+        video.addEventListener('ended', function() {
+            closeAd();
+        });
         
         // Skip ad function
         function skipAd() {
@@ -425,6 +247,7 @@
         
         // Close ad and show main content
         function closeAd() {
+            video.pause();
             adOverlay.style.animation = 'fadeIn 0.3s ease reverse';
             setTimeout(() => {
                 adOverlay.style.display = 'none';
@@ -437,7 +260,6 @@
             if (!adOverlay.style.display || adOverlay.style.display !== 'none') {
                 if (!e.target.closest('.ad-container')) {
                     // Optional: Show message that ad must complete
-                    // alert('Please wait for the ad to complete or use the skip button!');
                 }
             }
         }, true);
@@ -481,8 +303,6 @@
             document.getElementById('bugTitle').value = '';
             document.getElementById('bugDescription').value = '';
             document.getElementById('bugSteps').value = '';
-            
-            // In production, this would send to backend
         }
         
         // Complete task function
