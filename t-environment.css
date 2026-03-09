@@ -569,3 +569,130 @@ body {
         transform-origin: top left;
     }
 }
+
+/* ===== NEW AD OVERLAY STYLES ===== */
+.ad-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+.ad-container {
+    background: #000;
+    border-radius: 20px;
+    padding: 0;
+    max-width: 800px;
+    width: 90%;
+    text-align: center;
+    color: white;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    position: relative;
+    animation: slideUp 0.5s ease;
+    overflow: hidden;
+}
+
+.ad-video {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.ad-timer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    z-index: 10;
+}
+
+.ad-skip-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: not-allowed;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.ad-skip-btn.enabled {
+    background: white;
+    color: #000;
+    cursor: pointer;
+    opacity: 1;
+    animation: pulse 1.5s infinite;
+}
+
+.ad-skip-btn.enabled:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(255,255,255,0.3);
+}
+
+.sponsored-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    z-index: 10;
+}
+
+.main-content.blurred {
+    filter: blur(5px);
+    pointer-events: none;
+}
+
+.timer-pulse {
+    animation: timerPulse 1s infinite;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes timerPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
