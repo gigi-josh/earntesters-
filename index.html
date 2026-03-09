@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnTesters</title>
+    <title>EarnTesters - Become a Tester</title>
     <style>
         *{margin:0;padding:0;box-sizing:border-box;}
         body{
@@ -219,16 +219,20 @@
                         <div class="form-group">
                             <label>Devices *</label>
                             <select id="devices" multiple required>
-                                <option>iPhone</option><option>Android</option><option>iPad</option>
-                                <option>Windows</option><option>Mac</option><option>Linux</option>
+                                <option value="iPhone">iPhone</option>
+                                <option value="Android">Android</option>
+                                <option value="iPad">iPad</option>
+                                <option value="Windows">Windows</option>
+                                <option value="Mac">Mac</option>
+                                <option value="Linux">Linux</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label>I am a *</label>
                             <select id="personality" required>
                                 <option value="">Select</option>
-                                <option>Tester</option>
-                                <option>Developer</option>
+                                <option value="Tester">Tester</option>
+                                <option value="Developer">Developer</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -243,12 +247,18 @@
                         <div class="form-group">
                             <label>How did you hear?</label>
                             <select id="source">
-                                <option>Reddit</option><option>Twitter</option><option>Facebook</option>
-                                <option>Friend</option><option>Google</option><option>Other</option>
+                                <option value="Reddit">Reddit</option>
+                                <option value="Twitter">Twitter</option>
+                                <option value="Facebook">Facebook</option>
+                                <option value="Friend">Friend</option>
+                                <option value="Google">Google</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="checkbox-item"><input type="checkbox" id="terms" required> I agree to Terms *</label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="terms" required> I agree to Terms *
+                            </label>
                         </div>
                         <button type="submit">Join Waitlist →</button>
                         <div id="formMessage" class="message"></div>
@@ -260,19 +270,104 @@
     </div>
     
     <script>
+        const usersLS = JSON.parse(localStorage.getItem('tester-use'));
         document.getElementById('testerSignupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Get form values
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const personality = document.getElementById('personality').value;
+            const source = document.getElementById('source').value;
+            
+            // Get selected devices (multiple select)
+            const devicesSelect = document.getElementById('devices');
+            const devices = Array.from(devicesSelect.selectedOptions).map(opt => opt.value);
+            
+            // Get selected interests (checkboxes)
+            const interests = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value)
+                .filter(v => v); // Filter out the terms checkbox
+            
+            // Validate required fields
+            if (!fullName || !email || devices.length === 0 || !personality) {
+                const messageEl = document.getElementById('formMessage');
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Please fill in all required fields';
+                return;
+            }
+            
+            if (!document.getElementById('terms').checked) {
+                const messageEl = document.getElementById('formMessage');
+                messageEl.className = 'message error';
+                messageEl.textContent = 'You must agree to the Terms';
+                return;
+            }
+            
             const btn = e.target.querySelector('button');
+            const originalText = btn.textContent;
             btn.textContent = 'Submitting...';
             btn.disabled = true;
             
-            setTimeout(() => {
-                if(document.getElementById('personality').value === 'Tester')
-                    window.location.href = 'tester-dash.html';
-                else 
-                    window.location.href = 'developer-dash.html';
-            }, 500);
+            try {
+                // Prepare user data
+                const userData = {
+                    full_name: fullName,
+                    email: email,
+                    type: personality,
+                    devices: devices,
+                    interests: interests,
+                    source: source
+                };
+                
+                // Send to server
+                const response = await fetch('/new', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    localStorage.setItem('tester-use', JSON.stringify(userData));
+                    // Show success message
+                    const messageEl = document.getElementById('formMessage');
+                    messageEl.className = 'message success';
+                    messageEl.textContent = 'Signup successful! Redirecting...';
+                    
+                    // Redirect based on user type
+                    setTimeout(() => {
+                        if (personality === 'Tester') {
+                            window.location.href = 'tester-dash.html';
+                        } else {
+                            window.location.href = 'developer-dash.html';
+                        }
+                    }, 1500);
+                } else {
+                    // Show error
+                    const messageEl = document.getElementById('formMessage');
+                    messageEl.className = 'message error';
+                    messageEl.textContent = result.error || 'Signup failed. Please try again.';
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                const messageEl = document.getElementById('formMessage');
+                messageEl.className = 'message error';
+                messageEl.textContent = 'Network error. Please check your connection.';
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         });
+        
+        if (usersLS) {
+            document.getElementById('testerSignUpForm').style.display = none;   
+        }
     </script>
 </body>
 </html>
