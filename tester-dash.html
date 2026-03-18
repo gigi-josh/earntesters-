@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EarnTesters - Available Testing Tasks</title>
-    <link rel="stylesheet" href="styles.css">
     <style>
         /* EarnTesters Specific Styles */
         :root {
@@ -175,6 +174,7 @@
             justify-content: center;
             flex-direction: column;
             gap: 10px;
+            flex: 1;
         }
         
         .search-box input {
@@ -182,6 +182,8 @@
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .filter-button {
@@ -322,6 +324,65 @@
             color: var(--et-primary);
             border: 1px solid var(--et-primary);
         }
+.url-indicator {
+    display: inline-block;
+    background: #4CAF50;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+.loading-indicator {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+}
+
+.error-message {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+    font-size: 16px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid #f5c6cb;
+}
+
+.no-tasks {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.task-description {
+    white-space: pre-line;
+}
+
+.refresh-button {
+    background: transparent;
+    border: 1px solid var(--et-primary);
+    color: var(--et-primary);
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-left: 10px;
+}
+
+.refresh-button:hover {
+    background: var(--et-primary);
+    color: white;
+}
         
         /* Featured Section */
         .featured-section {
@@ -344,6 +405,32 @@
             color: var(--et-primary);
             text-decoration: none;
             font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* Loading States */
+        .loading-indicator {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
+        }
+        
+        .error-message {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+            font-size: 16px;
+        }
+        
+        .no-tasks {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 16px;
         }
         
         /* How it works */
@@ -389,6 +476,7 @@
             font-size: 14px;
             color: #666;
         }
+        
         footer {
             text-align: center;
             background: linear-gradient(90deg, cornflowerblue, #764ba2);
@@ -396,6 +484,7 @@
             font-weight: bold;
             padding: 20px 0;
         }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .welcome-section {
@@ -432,7 +521,7 @@
         <div class="container">
             <div class="header-top">
                 <a href="tester.html" class="et-logo">Earn<span>Testers</span></a>
-                <div class="balance">$42.50</div>
+                <div class="balance" id="user-balance">$42.50</div>
             </div>
             <nav class="et-nav">
                 <a href="dashboard.html">Browse Tasks</a>
@@ -455,11 +544,11 @@
                 
                 <div class="quick-stats">
                     <div class="stat-badge">
-                        <div class="number">12</div>
+                        <div class="number" id="available-count">0</div>
                         <div class="label">Available</div>
                     </div>
                     <div class="stat-badge">
-                        <div class="number">143</div>
+                        <div class="number" id="testers-online">143</div>
                         <div class="label">Testers Online</div>
                     </div>
                 </div>
@@ -467,30 +556,32 @@
             
             <!-- Filter Bar -->
             <div class="filter-bar">
-                <select class="filter-select">
+                <select class="filter-select" id="category-filter">
                     <option>All Categories</option>
-                    <option>Websites</option>
-                    <option>Mobile Apps</option>
-                    <option>Games</option>
-                    <option>UI/Design</option>
+                    <option>Website Testing</option>
+                    <option>Mobile App</option>
+                    <option>Game Testing</option>
+                    <option>UI/UX Feedback</option>
                 </select>
                 
-                <select class="filter-select">
+                <select class="filter-select" id="device-filter">
                     <option>Any Device</option>
-                    <option>Desktop Only</option>
-                    <option>Mobile Only</option>
+                    <option>Desktop</option>
+                    <option>Mobile</option>
+                    <option>Android</option>
+                    <option>iPhone</option>
                     <option>Tablet</option>
                 </select>
                 
-                <select class="filter-select">
+                <select class="filter-select" id="sort-filter">
                     <option>Sort by: Newest</option>
                     <option>Highest Pay</option>
                     <option>Most Spots Left</option>
                 </select>
                 
                 <div class="search-box">
-                    <input type="text" placeholder="Search tasks...">
-                    <button class="filter-button">Filter</button>
+                    <input type="text" id="search-input" placeholder="Search tasks (min 3 characters)...">
+                    <button class="filter-button" id="filter-btn">Filter</button>
                 </div>
             </div>
             
@@ -498,72 +589,11 @@
             <div class="featured-section">
                 <div class="section-header">
                     <h2>⭐ Featured Tasks</h2>
-                    <a href="#" class="view-all">View all →</a>
+                    <a href="#" class="view-all" onclick="showAllFeatured()">View all →</a>
                 </div>
                 
-                <div class="tasks-grid">
-                    <!-- Task Card 1 -->
-                    <div class="task-card">
-                        <div class="task-header">
-                            <span class="task-category">Website Testing</span>
-                            <span class="task-pay">$0.20 <small>per bug</small></span>
-                        </div>
-                        <div class="task-body">
-                            <h3 class="task-title">E-commerce Checkout Flow</h3>
-                            <p class="task-description">Test the complete checkout process on a fashion store. Find any bugs in payment, cart, or order confirmation.</p>
-                            <div class="task-meta">
-                                <span>🖥️ Desktop</span>
-                                <span>📱 Mobile</span>
-                                <span>⏱️ 15 min</span>
-                            </div>
-                        </div>
-                        <div class="task-footer">
-                            <span class="spots-left"><strong>12 spots</strong> left</span>
-                            <button class="task-button">Start Testing</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Task Card 2 -->
-                    <div class="task-card">
-                        <div class="task-header">
-                            <span class="task-category">Mobile App</span>
-                            <span class="task-pay">$2.00 <small>flat</small></span>
-                        </div>
-                        <div class="task-body">
-                            <h3 class="task-title">Fitness Tracker App</h3>
-                            <p class="task-description">Test the workout logging feature. Check if steps sync correctly and progress saves properly.</p>
-                            <div class="task-meta">
-                                <span>📱 Android</span>
-                                <span>📱 iPhone</span>
-                                <span>⏱️ 20 min</span>
-                            </div>
-                        </div>
-                        <div class="task-footer">
-                            <span class="spots-left"><strong>8 spots</strong> left</span>
-                            <button class="task-button">Start Testing</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Task Card 3 -->
-                    <div class="task-card">
-                        <div class="task-header">
-                            <span class="task-category">UI/UX Feedback</span>
-                            <span class="task-pay">$1.00 <small>flat</small></span>
-                        </div>
-                        <div class="task-body">
-                            <h3 class="task-title">Restaurant Menu Redesign</h3>
-                            <p class="task-description">Review new menu design. Is it easy to find items? Rate the layout and suggest improvements.</p>
-                            <div class="task-meta">
-                                <span>🖥️ Any</span>
-                                <span>📋 Survey</span>
-                                <span>⏱️ 10 min</span>
-                            </div>
-                        </div>
-                        <div class="task-footer">
-                            <span class="spots-left"><strong>25 spots</strong> left</span>
-                            <button class="task-button">Start Testing</button>
-                        </div>
-                    </div>
+                <div class="tasks-grid" id="featured-tasks-grid">
+                    <div class="loading-indicator">Loading featured tasks...</div>
                 </div>
             </div>
             
@@ -572,52 +602,42 @@
                 <h2>📋 All Available Tasks</h2>
             </div>
             
-            <div class="tasks-grid">
-                <!-- Task Card 4 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <span class="task-category">Website</span>
-                        <span class="task-pay">$0.09 <small>per bug</small></span>
-                    </div>
-                    <div class="task-body">
-                        <h3 class="task-title">Real Estate Listing Site</h3>
-                        <p class="task-description">Test property search filters. Check if location, price, and bedroom filters work correctly.</p>
-                        <div class="task-meta">
-                            <span>🖥️ Desktop</span>
-                            <span>⏱️ 10 min</span>
-                        </div>
-                    </div>
-                    <div class="task-footer">
-                        <span class="spots-left"><strong>6 spots</strong> left</span>
-                        <button class="task-button">Start Testing</button>
+            <div class="tasks-grid" id="all-tasks-grid">
+                <div class="loading-indicator">Loading tasks...</div>
+            </div>
+            
+            <!-- How it works -->
+            <div class="how-it-works">
+                <h3>How it works</h3>
+                <div class="step-item">
+                    <div class="step-number">1</div>
+                    <div class="step-text">
+                        <h4>Choose a task</h4>
+                        <p>Browse available testing tasks that match your skills and devices</p>
                     </div>
                 </div>
-                
-                <!-- Task Card 5 -->
-                <div class="task-card">
-                    <div class="task-header">
-                        <span class="task-category">Game Testing</span>
-                        <span class="task-pay">$2.00 <small>flat</small></span>
+                <div class="step-item">
+                    <div class="step-number">2</div>
+                    <div class="step-text">
+                        <h4>Complete testing</h4>
+                        <p>Follow the test cases and report any bugs or issues you find</p>
                     </div>
-                    <div class="task-body">
-                        <h3 class="task-title">Puzzle Game - Level 5</h3>
-                        <p class="task-description">Play through level 5 and report any glitches, crashes, or confusing mechanics.</p>
-                        <div class="task-meta">
-                            <span>📱 Android</span>
-                            <span>⏱️ 25 min</span>
-                        </div>
+                </div>
+                <div class="step-item">
+                    <div class="step-number">3</div>
+                    <div class="step-text">
+                        <h4>Get paid</h4>
+                        <p>Earn money for each valid bug report or completed task</p>
                     </div>
-                    <div class="task-footer">
-                        <span class="spots-left"><strong>4 spots</strong> left</span>
-                        <button class="task-button">Start testing </button>
-                        </div>
                 </div>
             </div>
         </div>
     </main>
+    
     <footer>
-        &copy 2026 JoshGG. All rights reserved 
+        &copy; 2026 JoshGG. All rights reserved 
     </footer>
+    
     <script src="tester-dash.js"></script>
 </body>
 </html>
