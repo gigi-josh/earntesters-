@@ -1,229 +1,383 @@
-const http = require('http');
-const fs = require('fs');
+require('dotenv').config();
+const express = require('express');
 const path = require('path');
-let nextBugId = 1;
+const { Pool } = require('pg');
+const cors = require('cors');
 
-const users = [];
-// Apps array (existing data)
-const apps = [
-    { id: 1, name: "FitTrack Pro", icon: "🏃", category: "Fitness", pay: "$2.00 flat", type: "Mobile App",
-        url: "No URL"
-    },
-    { id: 2, name: "Puzzle Quest", icon: "🎮", category: "Gaming", pay: "$0.15 per bug", type: "Mobile Game",
-        url: "No URL" },
-    { id: 3, name: "BudgetWise", icon: "💰", category: "Finance", pay: "$3.00 flat", type: "Mobile App", url: "No URL" },
-    { id: 4, name: "ChatConnect", icon: "💬", category: "Social", pay: "$0.10 per bug", type: "Web App", url: "No URL" },
-    { id: 5, name: "WeatherLive", icon: "☀️", category: "Weather", pay: "$1.50 flat", type: "Mobile App", url: "No URL" },
-    { id: 6, name: "Aflame Ministries Int.", icon: "aflameb.png", category: "Church", pay: "$0.08 per bug", type: "Website", url: "https://church-website-qxh5.onrender.com" },
-    { id: 7, name: "FoodDash", icon: "🍔", category: "Food", pay: "$2.50 flat", type: "Mobile App", url: "No URL" },
-    { id: 8, name: "MelodyPlayer", icon: "🎵", category: "Music", pay: "$0.12 per bug", type: "Mobile App", url: "No URL" },
-    { id: 9, name: "HabitHero", icon: "✅", category: "Productivity", pay: "$1.75 flat", type: "Mobile App", url: "No URL" }
-];
-let nextAppId = apps.length + 1;
+const app = express();
+const port = process.env.PORT || 3000;
 
-let bugs = [];
-
-const server = http.createServer((req, res) => {
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') {
-        res.writeHead(200);
-        res.end();
-        return;
-    }
-
-    // ==================== API ROUTES ====================
-    
-    // SIGNUP ENDPOINT - Updated to match frontend
-    if (req.url === '/new' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-            try {
-                const userData = JSON.parse(body);
-                
-                // Map frontend fields to your user object
-                const newUser = {
-                    full_name: userData.full_name,  // from frontend
-                    email: userData.email,          // from frontend
-                    type: userData.type,            // from frontend (personality)
-                    devices: userData.devices || [], // from frontend
-                    interests: userData.interests || [], // from frontend
-                    source: userData.source || '',   // from frontend
-                    created_at: new Date().toISOString()
-                };
-                
-                users.push(newUser);
-                console.log(`✅ New user signed up: ${newUser.full_name} (${newUser.email}) - Total users: ${users.length}`);
-                
-                res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ 
-                    success: true, 
-                    user: newUser,
-                    redirect: newUser.type === 'Tester' ? 'tester-dash.html' : 'developer-dash.html'
-                }));
-            } catch (error) {
-                console.error('Signup error:', error);
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({error: 'Invalid JSON'}));
-            }
-        });
-        return;
-    }
-    
-    // POST new app (with base64 screenshot)
-    if (req.url === '/api/test' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-            try {
-                const appData = JSON.parse(body);
-                
-                const newApp = {
-                    id: nextAppId++,
-                    name: appData.name,
-                    icon: appData.icon || '📱',
-                    category: appData.category,
-                    pay: appData.pay,
-                    type: appData.type || 'Mobile App',
-                    platform: appData.platform || 'Android & iOS',
-                    testFocus: appData.testFocus || [],
-                    screenshot: appData.screenshot || null,
-                    developer: appData.developer || 'Unknown',
-                    createdAt: new Date().toISOString()
-                };
-                
-                apps.push(newApp);
-                console.log(`📱 New app added: ${newApp.name} (Total: ${apps.length})`);
-                
-                res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(newApp));
-            } catch (error) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON' }));
-            }
-        });
-        return;
-    }
-    
-    // GET all apps (test endpoint)
-    if (req.url === '/test' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(apps));
-        return;
-    }
-    
-    // GET single app
-    if (req.url.startsWith('/api/apps/') && req.method === 'GET') {
-        const id = parseInt(req.url.split('/').pop());
-        const app = apps.find(a => a.id === id);
-        
-        if (app) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify(app));
-        } else {
-            res.writeHead(404, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'App not found' }));
-        }
-        return;
-    }
-    
-    // POST new bug report
-    if (req.url === '/api/bugs' && req.method === 'POST') {
-        let body = '';
-        req.on('data', chunk => body += chunk);
-        req.on('end', () => {
-            try {
-                const bugData = JSON.parse(body);
-                
-                const newBug = {
-                    id: nextBugId++,
-                    appId: bugData.appId,
-                    appName: bugData.appName,
-                    title: bugData.title,
-                    severity: bugData.severity,
-                    description: bugData.description,
-                    steps: bugData.steps,
-                    device: bugData.device,
-                    screenshot: bugData.screenshot || null,
-                    tester: bugData.tester || 'Anonymous',
-                    status: 'pending',
-                    createdAt: new Date().toISOString()
-                };
-                
-                bugs.push(newBug);
-                console.log(`🐛 New bug reported for app ${newBug.appId} (Total: ${bugs.length})`);
-                
-                res.writeHead(201, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(newBug));
-            } catch (error) {
-                res.writeHead(400, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Invalid JSON' }));
-            }
-        });
-        return;
-    }
-
-    // GET bugs for an app
-    if (req.url.startsWith('/api/bugs/') && req.method === 'GET') {
-        const appId = parseInt(req.url.split('/').pop());
-        const appBugs = bugs.filter(b => b.appId === appId);
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(appBugs));
-        return;
-    }
-
-    // GET all bugs
-    if (req.url === '/api/bugs' && req.method === 'GET') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(bugs));
-        return;
-    }
-
-    // ==================== STATIC FILES ====================
-    
-    let filePath = req.url === '/' 
-        ? path.join(__dirname, 'tester.html') 
-        : path.join(__dirname, req.url);
-    
-    const ext = path.extname(filePath);
-    const types = {
-        '.html': 'text/html',
-        '.css': 'text/css',
-        '.js': 'text/javascript',
-        '.png': 'image/png',
-        '.jpg': 'image/jpeg',
-        '.json': 'application/json'
-    };
-    
-    fs.readFile(filePath, (error, data) => {
-        if (error) {
-            if (error.code === 'ENOENT') {
-                res.writeHead(404, { 'Content-Type': 'text/html' });
-                res.end('404 - File Not Found');
-            } else {
-                res.writeHead(500, { 'Content-Type': 'text/html' });
-                res.end('500 - Server Error');
-            }
-        } else {
-            res.writeHead(200, { 'Content-Type': types[ext] || 'text/plain' });
-            res.end(data);
-        }
-    });
+// ========== RENDER.COM POSTGRESQL CONNECTION ==========
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Required for Render.com
+  },
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000,
 });
 
-server.listen(process.env.PORT || 3000, '0.0.0.0', () => {
-    console.log('🚀 Server running at http://localhost:3000');
-    console.log(`📱 Apps in memory: ${apps.length}`);
-    console.log(`🐛 Bugs in memory: ${bugs.length}`);
-    console.log(`👤 Users signed up: ${users.length}`);
-    console.log('\n📌 Endpoints:');
-    console.log('   POST /new - User signup (matches frontend)');
-    console.log('   GET  /test - View all apps');
-    console.log('   POST /api/test - Add new app');
-    console.log('   POST /api/bugs - Report bug');
-    console.log('   GET  /api/bugs - View all bugs');
+// Test database connection
+pool.connect((err, client, release) => {
+  if (err) {
+    console.error('❌ Error connecting to Render PostgreSQL:', err.stack);
+    console.error('Please check your DATABASE_URL in .env file');
+  } else {
+    console.log('✅ Connected to Render PostgreSQL successfully');
+    release();
+  }
+});
+
+// ========== MIDDLEWARE ==========
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static(__dirname));
+
+// ========== DATABASE INITIALIZATION ==========
+async function initializeDatabase() {
+  const client = await pool.connect();
+  try {
+    // Create users table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        full_name VARCHAR(100) NOT NULL,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        type VARCHAR(50) NOT NULL,
+        devices TEXT[] DEFAULT '{}',
+        interests TEXT[] DEFAULT '{}',
+        source VARCHAR(255),
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    // Create apps table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS apps (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        icon VARCHAR(50) DEFAULT '📱',
+        category VARCHAR(100) NOT NULL,
+        pay VARCHAR(100) NOT NULL,
+        type VARCHAR(100) DEFAULT 'Mobile App',
+        platform VARCHAR(100) DEFAULT 'Android & iOS',
+        test_focus TEXT[] DEFAULT '{}',
+        screenshot TEXT,
+        developer VARCHAR(255) DEFAULT 'Unknown',
+        url TEXT,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    // Create bugs table
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS bugs (
+        id SERIAL PRIMARY KEY,
+        app_id INTEGER REFERENCES apps(id) ON DELETE CASCADE,
+        app_name VARCHAR(255) NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        severity VARCHAR(50) NOT NULL,
+        description TEXT NOT NULL,
+        steps TEXT,
+        device VARCHAR(255),
+        screenshot TEXT,
+        tester VARCHAR(255) DEFAULT 'Anonymous',
+        status VARCHAR(50) DEFAULT 'pending',
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+
+    // Create indexes for better performance
+    await client.query('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_bugs_app_id ON bugs(app_id)');
+    await client.query('CREATE INDEX IF NOT EXISTS idx_bugs_status ON bugs(status)');
+
+    console.log('✅ Database tables initialized successfully');
+
+    // Insert sample apps if none exist
+    const appsCount = await client.query('SELECT COUNT(*) FROM apps');
+    if (parseInt(appsCount.rows[0].count) === 0) {
+      const sampleApps = [
+        { name: "FitTrack Pro", icon: "🏃", category: "Fitness", pay: "$2.00 flat", type: "Mobile App", url: "No URL" },
+        { name: "Puzzle Quest", icon: "🎮", category: "Gaming", pay: "$0.15 per bug", type: "Mobile Game", url: "No URL" },
+        { name: "BudgetWise", icon: "💰", category: "Finance", pay: "$3.00 flat", type: "Mobile App", url: "No URL" },
+        { name: "ChatConnect", icon: "💬", category: "Social", pay: "$0.10 per bug", type: "Web App", url: "No URL" },
+        { name: "WeatherLive", icon: "☀️", category: "Weather", pay: "$1.50 flat", type: "Mobile App", url: "No URL" },
+        { name: "Aflame Ministries Int.", icon: "aflameb.png", category: "Church", pay: "$0.08 per bug", type: "Website", url: "https://church-website-qxh5.onrender.com" },
+        { name: "FoodDash", icon: "🍔", category: "Food", pay: "$2.50 flat", type: "Mobile App", url: "No URL" },
+        { name: "MelodyPlayer", icon: "🎵", category: "Music", pay: "$0.12 per bug", type: "Mobile App", url: "No URL" },
+        { name: "HabitHero", icon: "✅", category: "Productivity", pay: "$1.75 flat", type: "Mobile App", url: "No URL" }
+      ];
+
+      for (const app of sampleApps) {
+        await client.query(
+          `INSERT INTO apps (name, icon, category, pay, type, url) 
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [app.name, app.icon, app.category, app.pay, app.type, app.url]
+        );
+      }
+      console.log('✅ Sample apps inserted');
+    }
+
+  } catch (error) {
+    console.error('❌ Error initializing database:', error);
+  } finally {
+    client.release();
+  }
+}
+
+// Initialize database on startup
+initializeDatabase();
+
+// ========== API ROUTES ==========
+
+// SIGNUP ENDPOINT
+app.post('/new', async (req, res) => {
+  try {
+    const { full_name, email, type, devices, interests, source } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await pool.query(
+      'SELECT * FROM users WHERE email = $1',
+      [email]
+    );
+    
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ 
+        error: 'User with this email already exists' 
+      });
+    }
+    
+    // Insert new user
+    const result = await pool.query(
+      `INSERT INTO users (full_name, email, type, devices, interests, source, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+       RETURNING id, full_name, email, type, created_at`,
+      [full_name, email, type, devices || [], interests || [], source || '']
+    );
+    
+    console.log(`✅ New user signed up: ${full_name} (${email})`);
+    
+    res.status(201).json({
+      success: true,
+      user: result.rows[0],
+      redirect: type === 'Tester' ? 'tester-dash.html' : 'developer-dash.html'
+    });
+    
+  } catch (error) {
+    console.error('Signup error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET all users (for testing)
+app.get('/users', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, full_name, email, type, created_at FROM users ORDER BY created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST new app
+app.post('/api/test', async (req, res) => {
+  try {
+    const { 
+      name, icon, category, pay, type, 
+      platform, testFocus, screenshot, developer, url 
+    } = req.body;
+    
+    const result = await pool.query(
+      `INSERT INTO apps (name, icon, category, pay, type, platform, test_focus, screenshot, developer, url, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+       RETURNING *`,
+      [
+        name, 
+        icon || '📱', 
+        category, 
+        pay, 
+        type || 'Mobile App',
+        platform || 'Android & iOS',
+        testFocus || [],
+        screenshot || null,
+        developer || 'Unknown',
+        url || 'No URL'
+      ]
+    );
+    
+    console.log(`📱 New app added: ${name}`);
+    res.status(201).json(result.rows[0]);
+    
+  } catch (error) {
+    console.error('Error adding app:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET all apps
+app.get('/test', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM apps ORDER BY created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching apps:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET single app
+app.get('/api/apps/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM apps WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'App not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching app:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// POST new bug report
+app.post('/api/bugs', async (req, res) => {
+  try {
+    const { 
+      appId, appName, title, severity, description, 
+      steps, device, screenshot, tester 
+    } = req.body;
+    
+    const result = await pool.query(
+      `INSERT INTO bugs (app_id, app_name, title, severity, description, steps, device, screenshot, tester, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
+       RETURNING *`,
+      [appId, appName, title, severity, description, steps, device, screenshot, tester || 'Anonymous']
+    );
+    
+    console.log(`🐛 New bug reported for app ${appName}`);
+    res.status(201).json(result.rows[0]);
+    
+  } catch (error) {
+    console.error('Error reporting bug:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET bugs for a specific app
+app.get('/api/bugs/:appId', async (req, res) => {
+  try {
+    const { appId } = req.params;
+    const result = await pool.query(
+      'SELECT * FROM bugs WHERE app_id = $1 ORDER BY created_at DESC',
+      [appId]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching bugs:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET all bugs
+app.get('/api/bugs', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM bugs ORDER BY created_at DESC'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching bugs:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update bug status
+app.patch('/api/bugs/:id/status', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const result = await pool.query(
+      'UPDATE bugs SET status = $1 WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Bug not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error updating bug:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get dashboard stats
+app.get('/api/stats', async (req, res) => {
+  try {
+    const usersCount = await pool.query('SELECT COUNT(*) FROM users');
+    const appsCount = await pool.query('SELECT COUNT(*) FROM apps');
+    const bugsCount = await pool.query('SELECT COUNT(*) FROM bugs');
+    const pendingBugs = await pool.query("SELECT COUNT(*) FROM bugs WHERE status = 'pending'");
+    
+    res.json({
+      totalUsers: parseInt(usersCount.rows[0].count),
+      totalApps: parseInt(appsCount.rows[0].count),
+      totalBugs: parseInt(bugsCount.rows[0].count),
+      pendingBugs: parseInt(pendingBugs.rows[0].count)
+    });
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ========== HEALTH CHECK ==========
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: 'connected'
+  });
+});
+
+// ========== STATIC FILES (catch-all for HTML files) ==========
+app.get('*', (req, res) => {
+  // Try to serve static files, fallback to 404
+  const filePath = path.join(__dirname, req.path);
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    res.sendFile(filePath);
+  } else {
+    res.status(404).sendFile(path.join(__dirname, '404.html'));
+  }
+});
+
+// ========== ERROR HANDLING ==========
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// ========== START SERVER ==========
+app.listen(port, '0.0.0.0', () => {
+  console.log(`🚀 Express server running at http://localhost:${port}`);
+  console.log(`📊 Database: Render PostgreSQL`);
+  console.log('\n📌 Endpoints:');
+  console.log('   POST /new - User signup');
+  console.log('   GET  /users - View all users');
+  console.log('   GET  /test - View all apps');
+  console.log('   POST /api/test - Add new app');
 });
