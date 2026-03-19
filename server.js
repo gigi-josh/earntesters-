@@ -3,7 +3,6 @@ const express = require('express');
 const path = require('path');
 const { Pool } = require('pg');
 const cors = require('cors');
-const fs = require('fs');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,7 +11,7 @@ const port = process.env.PORT || 3000;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false // Required for Render.com
+    rejectUnauthorized: false
   },
   max: 20,
   idleTimeoutMillis: 30000,
@@ -31,7 +30,7 @@ async function initializeDatabase() {
   try {
     console.log('📦 Creating database tables...');
     
-    // Create users table
+    // Create users table with earnings column
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -41,10 +40,11 @@ async function initializeDatabase() {
         devices TEXT[] DEFAULT '{}',
         interests TEXT[] DEFAULT '{}',
         source VARCHAR(255),
+        earnings DECIMAL(10,2) DEFAULT 0.00,
         created_at TIMESTAMP DEFAULT NOW()
       )
     `);
-    console.log('✅ Users table ready');
+    console.log('✅ Users table ready (with earnings column)');
 
     // Create apps table
     await client.query(`
@@ -90,33 +90,7 @@ async function initializeDatabase() {
     await client.query('CREATE INDEX IF NOT EXISTS idx_bugs_status ON bugs(status)');
     
     console.log('✅ Indexes created');
-
-    // Insert sample apps if none exist
-    const appsCount = await client.query('SELECT COUNT(*) FROM apps');
-    if (parseInt(appsCount.rows[0].count) === 0) {
-      console.log('📱 Inserting sample apps...');
-      
-      const sampleApps = [
-        ['FitTrack Pro', '🏃', 'Fitness', '$2.00 flat', 'Mobile App', 'No URL'],
-        ['Puzzle Quest', '🎮', 'Gaming', '$0.15 per bug', 'Mobile Game', 'No URL'],
-        ['BudgetWise', '💰', 'Finance', '$3.00 flat', 'Mobile App', 'No URL'],
-        ['ChatConnect', '💬', 'Social', '$0.10 per bug', 'Web App', 'No URL'],
-        ['WeatherLive', '☀️', 'Weather', '$1.50 flat', 'Mobile App', 'No URL'],
-        ['Aflame Ministries Int.', 'aflameb.png', 'Church', '$0.08 per bug', 'Website', 'https://church-website-qxh5.onrender.com'],
-        ['FoodDash', '🍔', 'Food', '$2.50 flat', 'Mobile App', 'No URL'],
-        ['MelodyPlayer', '🎵', 'Music', '$0.12 per bug', 'Mobile App', 'No URL'],
-        ['HabitHero', '✅', 'Productivity', '$1.75 flat', 'Mobile App', 'No URL']
-      ];
-
-      for (const app of sampleApps) {
-        await client.query(
-          `INSERT INTO apps (name, icon, category, pay, type, url) 
-           VALUES ($1, $2, $3, $4, $5, $6)`,
-          app
-        );
-      }
-      console.log('✅ Sample apps inserted');
-    }
+    console.log('🎉 Database initialization complete!');
 
   } catch (error) {
     console.error('❌ Error creating tables:', error);
@@ -147,6 +121,133 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'tester.html'));
 });
 
+// Get current user from cookie/session
+app.get('/api/me', async (req, res) => {
+  try {
+    // Assuming you store userId in cookie
+    const userId = req.cookies.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const result = await pool.query(
+      'SELECT id, full_name, email, type, earnings FROM users WHERE id = $1',
+      [userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user earnings
+app.get('/api/earnings/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await pool.query('SELECT earnings FROM users WHERE id = $1', [userId]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ earnings: result.rows[0].earnings || 0 });
+  } catch (error) {
+    console.error('Error fetching earnings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Update earnings when bug is approved
+app.post('/api/earnings/add', async (req, res) => {
+  try {
+    const { userId, amount, bugId } = req.body;
+    
+    // Start transaction
+    await pool.query('BEGIN');
+    
+    // Update user earnings
+    await pool.query(
+      'UPDATE users SET earnings = earnings + $1 WHERE id = $2',
+      [amount, userId]
+    );
+    
+    // Mark bug as approved if bugId provided
+    if (bugId) {
+      await pool.query(
+        'UPDATE bugs SET status = $1 WHERE id = $2',
+        ['approved', bugId]
+      );
+    }
+    
+    // Get updated earnings
+    const result = await pool.query('SELECT earnings FROM users WHERE id = $1', [userId]);
+    
+    await pool.query('COMMIT');
+    
+    res.json({ 
+      success: true, 
+      earnings: result.rows[0].earnings 
+    });
+    
+  } catch (error) {
+    await pool.query('ROLLBACK');
+    console.error('Error adding earnings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get user's approved bugs with earnings
+app.get('/api/user/:userId/earnings-history', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const result = await pool.query(`
+      SELECT id, title, severity, status, created_at,
+        CASE 
+          WHEN severity = 'high' OR severity LIKE '%High%' THEN 5.00
+          WHEN severity = 'medium' OR severity LIKE '%Medium%' THEN 2.50
+          WHEN severity = 'low' OR severity LIKE '%Low%' THEN 1.00
+          ELSE 0.50
+        END as amount
+      FROM bugs 
+      WHERE tester = $1 AND status = 'approved'
+      ORDER BY created_at DESC
+    `, [userId]);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching earnings history:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get single app by ID
+app.post('/get-from', async(req, res) => {
+  try {
+    const { id } = req.body;
+    console.log('Fetching app with ID:', id);
+    
+    const result = await pool.query('SELECT * FROM apps WHERE id = $1', [id]);
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'App not found' });
+    }
+    
+    console.log('App found:', result.rows[0].name);
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching app:', err);
+    res.status(500).json({ error: "Internal Server error" });
+  }
+});
+
 // SIGNUP ENDPOINT
 app.post('/new', async (req, res) => {
   try {
@@ -164,15 +265,22 @@ app.post('/new', async (req, res) => {
       });
     }
     
-    // Insert new user
+    // Insert new user with earnings default 0
     const result = await pool.query(
-      `INSERT INTO users (full_name, email, type, devices, interests, source, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
-       RETURNING id, full_name, email, type, created_at`,
+      `INSERT INTO users (full_name, email, type, devices, interests, source, earnings, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 0.00, NOW())
+       RETURNING id, full_name, email, type, earnings, created_at`,
       [full_name, email, type, devices || [], interests || [], source || '']
     );
     
     console.log(`✅ New user signed up: ${full_name} (${email})`);
+    
+    // Set cookie
+    res.cookie('userId', result.rows[0].id, {
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'strict'
+    });
     
     res.status(201).json({
       success: true,
@@ -186,11 +294,53 @@ app.post('/new', async (req, res) => {
   }
 });
 
+// LOGIN ENDPOINT
+app.post('/login', async (req, res) => {
+  try {
+    const { identifier, password } = req.body;
+    
+    // Find user by email (simplified - add bcrypt later)
+    const result = await pool.query(
+      'SELECT id, full_name, email, type, earnings FROM users WHERE email = $1',
+      [identifier]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+    
+    const user = result.rows[0];
+    
+    // Set cookie
+    res.cookie('userId', user.id, {
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'strict'
+    });
+    
+    res.json({
+      success: true,
+      user: user,
+      redirect: user.type === 'Tester' ? 'tester-dash.html' : 'developer-dash.html'
+    });
+    
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// LOGOUT ENDPOINT
+app.post('/api/logout', (req, res) => {
+  res.clearCookie('userId');
+  res.json({ success: true, message: 'Logged out successfully' });
+});
+
 // GET all users
 app.get('/users', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, full_name, email, type, created_at FROM users ORDER BY created_at DESC'
+      'SELECT id, full_name, email, type, earnings, created_at FROM users ORDER BY created_at DESC'
     );
     res.json(result.rows);
   } catch (error) {
@@ -320,7 +470,7 @@ app.patch('/api/bugs/:id/status', async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     
-    const validStatuses = ['pending', 'reviewing', 'fixed', 'rejected'];
+    const validStatuses = ['pending', 'reviewing', 'approved', 'rejected', 'paid'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
@@ -348,12 +498,14 @@ app.get('/api/stats', async (req, res) => {
     const appsCount = await pool.query('SELECT COUNT(*) FROM apps');
     const bugsCount = await pool.query('SELECT COUNT(*) FROM bugs');
     const pendingBugs = await pool.query("SELECT COUNT(*) FROM bugs WHERE status = 'pending'");
+    const totalEarnings = await pool.query("SELECT SUM(earnings) FROM users");
     
     res.json({
       totalUsers: parseInt(usersCount.rows[0].count),
       totalApps: parseInt(appsCount.rows[0].count),
       totalBugs: parseInt(bugsCount.rows[0].count),
-      pendingBugs: parseInt(pendingBugs.rows[0].count)
+      pendingBugs: parseInt(pendingBugs.rows[0].count),
+      totalEarnings: parseFloat(totalEarnings.rows[0].sum) || 0
     });
   } catch (error) {
     console.error('Error fetching stats:', error);
@@ -372,8 +524,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ========== STATIC FILES ==========
-// Serve HTML files directly
+// ========== STATIC HTML ROUTES ==========
 app.get('/tester-dash.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'tester-dash.html'));
 });
@@ -384,6 +535,30 @@ app.get('/developer-dash.html', (req, res) => {
 
 app.get('/login.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+app.get('/testing-website.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'testing-website.html'));
+});
+
+app.get('/testing-web.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'testing-web.html'));
+});
+
+app.get('/testing-app.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'testing-app.html'));
+});
+
+app.get('/test-mobile.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-mobile.html'));
+});
+
+app.get('/test-game.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'test-game.html'));
+});
+
+app.get('/team.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'team.html'));
 });
 
 // ========== 404 HANDLER ==========
@@ -405,4 +580,21 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`📊 Database: Render PostgreSQL`);
   console.log(`🌍 Health check: /health`);
   console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log('\n📌 Endpoints:');
+  console.log('   GET  /api/me                - Get current user');
+  console.log('   GET  /api/earnings/:userId  - Get user earnings');
+  console.log('   POST /api/earnings/add      - Add earnings');
+  console.log('   GET  /api/user/:userId/earnings-history - Earnings history');
+  console.log('   POST /get-from               - Get app by ID');
+  console.log('   POST /new                    - User signup');
+  console.log('   POST /login                   - User login');
+  console.log('   POST /api/logout              - Logout');
+  console.log('   GET  /users                   - View all users');
+  console.log('   GET  /test                     - View all apps');
+  console.log('   POST /api/test                 - Add new app');
+  console.log('   POST /api/bugs                 - Report bug');
+  console.log('   GET  /api/bugs                 - View all bugs');
+  console.log('   GET  /api/bugs/:appId          - View bugs for app');
+  console.log('   PATCH /api/bugs/:id/status     - Update bug status');
+  console.log('   GET  /api/stats                 - Dashboard stats\n');
 });
