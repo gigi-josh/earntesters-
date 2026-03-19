@@ -114,7 +114,121 @@ pool.connect(async (err, client, release) => {
   release();
 });
 
-// ========== API ROUTES ==========
+// ========== API ROUTES ========
+
+// SQL Backup endpoint - Creates a complete database backup as SQL file
+app.get('/admin/backup-sql', async (req, res) => {
+    try {
+        // Simple password protection to prevent unauthorized access
+        const { password } = req.query;
+        if (password !== 'YourSecurePassword123') {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+        
+        console.log('📦 Generating SQL backup...');
+        
+        let sql = `-- ========================================\n`;
+        sql += `-- EarnTesters Database Backup\n`;
+        sql += `-- Generated: ${new Date().toISOString()}\n`;
+        sql += `-- ========================================\n\n`;
+        
+        // ========== 1. BACKUP USERS TABLE ==========
+        const users = await pool.query('SELECT * FROM users ORDER BY id');
+        sql += `--\n-- Users Table (${users.rows.length} records)\n--\n`;
+        
+        // First, clear existing data (optional - comment out if not needed)
+        sql += `TRUNCATE TABLE users RESTART IDENTITY CASCADE;\n`;
+        
+        users.rows.forEach(user => {
+            // Handle array fields (devices, interests)
+            const devices = JSON.stringify(user.devices || []).replace(/'/g, "''");
+            const interests = JSON.stringify(user.interests || []).replace(/'/g, "''");
+            
+            sql += `INSERT INTO users (id, full_name, email, type, devices, interests, source, earnings, created_at) VALUES (`;
+            sql += `${user.id}, `;
+            sql += `'${(user.full_name || '').replace(/'/g, "''")}', `;
+            sql += `'${(user.email || '').replace(/'/g, "''")}', `;
+            sql += `'${user.type || 'Tester'}', `;
+            sql += `'${devices}', `;
+            sql += `'${interests}', `;
+            sql += `'${(user.source || '').replace(/'/g, "''")}', `;
+            sql += `${user.earnings || 0}, `;
+            sql += `'${user.created_at || new Date().toISOString()}');\n`;
+        });
+        
+        sql += `\n-- Reset sequence\n`;
+        sql += `SELECT setval('users_id_seq', (SELECT MAX(id) FROM users));\n\n`;
+        
+        // ========== 2. BACKUP APPS TABLE ==========
+        const apps = await pool.query('SELECT * FROM apps ORDER BY id');
+        sql += `--\n-- Apps Table (${apps.rows.length} records)\n--\n`;
+        
+        sql += `TRUNCATE TABLE apps RESTART IDENTITY CASCADE;\n`;
+        
+        apps.rows.forEach(app => {
+            // Handle array field (test_focus)
+            const testFocus = JSON.stringify(app.test_focus || []).replace(/'/g, "''");
+            
+            sql += `INSERT INTO apps (id, name, icon, category, pay, type, platform, test_focus, screenshot, developer, url, created_at) VALUES (`;
+            sql += `${app.id}, `;
+            sql += `'${(app.name || '').replace(/'/g, "''")}', `;
+            sql += `'${(app.icon || '📱').replace(/'/g, "''")}', `;
+            sql += `'${(app.category || '').replace(/'/g, "''")}', `;
+            sql += `'${(app.pay || '').replace(/'/g, "''")}', `;
+            sql += `'${(app.type || 'Mobile App').replace(/'/g, "''")}', `;
+            sql += `'${(app.platform || 'Android & iOS').replace(/'/g, "''")}', `;
+            sql += `'${testFocus}', `;
+            sql += app.screenshot ? `'${app.screenshot.replace(/'/g, "''")}', ` : `NULL, `;
+            sql += `'${(app.developer || 'Unknown').replace(/'/g, "''")}', `;
+            sql += app.url ? `'${app.url.replace(/'/g, "''")}', ` : `NULL, `;
+            sql += `'${app.created_at || new Date().toISOString()}');\n`;
+        });
+        
+        sql += `\n-- Reset sequence\n`;
+        sql += `SELECT setval('apps_id_seq', (SELECT MAX(id) FROM apps));\n\n`;
+        
+        // ========== 3. BACKUP BUGS TABLE ==========
+        const bugs = await pool.query('SELECT * FROM bugs ORDER BY id');
+        sql += `--\n-- Bugs Table (${bugs.rows.length} records)\n--\n`;
+        
+        sql += `TRUNCATE TABLE bugs RESTART IDENTITY CASCADE;\n`;
+        
+        bugs.rows.forEach(bug => {
+            sql += `INSERT INTO bugs (id, app_id, app_name, title, severity, description, steps, device, screenshot, tester, status, created_at) VALUES (`;
+            sql += `${bug.id}, `;
+            sql += `${bug.app_id}, `;
+            sql += `'${(bug.app_name || '').replace(/'/g, "''")}', `;
+            sql += `'${(bug.title || '').replace(/'/g, "''")}', `;
+            sql += `'${(bug.severity || 'low').replace(/'/g, "''")}', `;
+            sql += `'${(bug.description || '').replace(/'/g, "''")}', `;
+            sql += bug.steps ? `'${bug.steps.replace(/'/g, "''")}', ` : `NULL, `;
+            sql += `'${(bug.device || '').replace(/'/g, "''")}', `;
+            sql += bug.screenshot ? `'${bug.screenshot.replace(/'/g, "''")}', ` : `NULL, `;
+            sql += `'${(bug.tester || 'Anonymous').replace(/'/g, "''")}', `;
+            sql += `'${bug.status || 'pending'}', `;
+            sql += `'${bug.created_at || new Date().toISOString()}');\n`;
+        });
+        
+        sql += `\n-- Reset sequence\n`;
+        sql += `SELECT setval('bugs_id_seq', (SELECT MAX(id) FROM bugs));\n\n`;
+        
+        sql += `-- ========================================\n`;
+        sql += `-- Backup Complete!\n`;
+        sql += `-- ========================================\n`;
+        
+        console.log(`✅ SQL Backup generated: ${users.rows.length} users, ${apps.rows.length} apps, ${bugs.rows.length} bugs`);
+        
+        // Set headers for file download
+        res.setHeader('Content-Disposition', 'attachment; filename=earntesters-backup.sql');
+        res.setHeader('Content-Type', 'application/sql');
+        
+        res.send(sql);
+        
+    } catch (error) {
+        console.error('❌ Backup error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // Root route - serve tester.html
 app.get('/', (req, res) => {
