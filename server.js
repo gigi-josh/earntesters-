@@ -22,7 +22,7 @@ const pool = new Pool({
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(__dirname));
+app.use(express.static(__dirname)); // Serves ALL static files automatically
 
 // ========== DATABASE INITIALIZATION ==========
 async function initializeDatabase() {
@@ -114,8 +114,7 @@ pool.connect(async (err, client, release) => {
   release();
 });
 
-// ========== API ROUTES ========
-
+// ========== BACKUP ENDPOINT ==========
 // SQL Backup endpoint - Creates a complete database backup as SQL file
 app.get('/admin/backup-sql', async (req, res) => {
     try {
@@ -135,12 +134,9 @@ app.get('/admin/backup-sql', async (req, res) => {
         // ========== 1. BACKUP USERS TABLE ==========
         const users = await pool.query('SELECT * FROM users ORDER BY id');
         sql += `--\n-- Users Table (${users.rows.length} records)\n--\n`;
-        
-        // First, clear existing data (optional - comment out if not needed)
         sql += `TRUNCATE TABLE users RESTART IDENTITY CASCADE;\n`;
         
         users.rows.forEach(user => {
-            // Handle array fields (devices, interests)
             const devices = JSON.stringify(user.devices || []).replace(/'/g, "''");
             const interests = JSON.stringify(user.interests || []).replace(/'/g, "''");
             
@@ -162,11 +158,9 @@ app.get('/admin/backup-sql', async (req, res) => {
         // ========== 2. BACKUP APPS TABLE ==========
         const apps = await pool.query('SELECT * FROM apps ORDER BY id');
         sql += `--\n-- Apps Table (${apps.rows.length} records)\n--\n`;
-        
         sql += `TRUNCATE TABLE apps RESTART IDENTITY CASCADE;\n`;
         
         apps.rows.forEach(app => {
-            // Handle array field (test_focus)
             const testFocus = JSON.stringify(app.test_focus || []).replace(/'/g, "''");
             
             sql += `INSERT INTO apps (id, name, icon, category, pay, type, platform, test_focus, screenshot, developer, url, created_at) VALUES (`;
@@ -190,7 +184,6 @@ app.get('/admin/backup-sql', async (req, res) => {
         // ========== 3. BACKUP BUGS TABLE ==========
         const bugs = await pool.query('SELECT * FROM bugs ORDER BY id');
         sql += `--\n-- Bugs Table (${bugs.rows.length} records)\n--\n`;
-        
         sql += `TRUNCATE TABLE bugs RESTART IDENTITY CASCADE;\n`;
         
         bugs.rows.forEach(bug => {
@@ -218,10 +211,8 @@ app.get('/admin/backup-sql', async (req, res) => {
         
         console.log(`✅ SQL Backup generated: ${users.rows.length} users, ${apps.rows.length} apps, ${bugs.rows.length} bugs`);
         
-        // Set headers for file download
         res.setHeader('Content-Disposition', 'attachment; filename=earntesters-backup.sql');
         res.setHeader('Content-Type', 'application/sql');
-        
         res.send(sql);
         
     } catch (error) {
@@ -230,15 +221,16 @@ app.get('/admin/backup-sql', async (req, res) => {
     }
 });
 
-// Root route - serve tester.html
+// ========== API ROUTES ==========
+
+// Root route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'tester.html'));
 });
 
-// Get current user from cookie/session
+// Get current user from cookie
 app.get('/api/me', async (req, res) => {
   try {
-    // Assuming you store userId in cookie
     const userId = req.cookies.userId;
     
     if (!userId) {
@@ -283,16 +275,13 @@ app.post('/api/earnings/add', async (req, res) => {
   try {
     const { userId, amount, bugId } = req.body;
     
-    // Start transaction
     await pool.query('BEGIN');
     
-    // Update user earnings
     await pool.query(
       'UPDATE users SET earnings = earnings + $1 WHERE id = $2',
       [amount, userId]
     );
     
-    // Mark bug as approved if bugId provided
     if (bugId) {
       await pool.query(
         'UPDATE bugs SET status = $1 WHERE id = $2',
@@ -300,7 +289,6 @@ app.post('/api/earnings/add', async (req, res) => {
       );
     }
     
-    // Get updated earnings
     const result = await pool.query('SELECT earnings FROM users WHERE id = $1', [userId]);
     
     await pool.query('COMMIT');
@@ -367,7 +355,6 @@ app.post('/new', async (req, res) => {
   try {
     const { full_name, email, type, devices, interests, source } = req.body;
     
-    // Check if user already exists
     const existingUser = await pool.query(
       'SELECT * FROM users WHERE email = $1',
       [email]
@@ -379,7 +366,6 @@ app.post('/new', async (req, res) => {
       });
     }
     
-    // Insert new user with earnings default 0
     const result = await pool.query(
       `INSERT INTO users (full_name, email, type, devices, interests, source, earnings, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, 0.00, NOW())
@@ -389,7 +375,6 @@ app.post('/new', async (req, res) => {
     
     console.log(`✅ New user signed up: ${full_name} (${email})`);
     
-    // Set cookie
     res.cookie('userId', result.rows[0].id, {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
@@ -413,7 +398,6 @@ app.post('/login', async (req, res) => {
   try {
     const { identifier, password } = req.body;
     
-    // Find user by email (simplified - add bcrypt later)
     const result = await pool.query(
       'SELECT id, full_name, email, type, earnings FROM users WHERE email = $1',
       [identifier]
@@ -425,7 +409,6 @@ app.post('/login', async (req, res) => {
     
     const user = result.rows[0];
     
-    // Set cookie
     res.cookie('userId', user.id, {
       maxAge: 24 * 60 * 60 * 1000,
       httpOnly: true,
@@ -638,44 +621,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// ========== STATIC HTML ROUTES ==========
-app.get('/tester-dash.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'tester-dash.html'));
-});
-
-app.get('/developer-dash.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'developer-dash.html'));
-});
-
-app.get('/login.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'login.html'));
-});
-
-app.get('/testing-website.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'testing-website.html'));
-});
-
-app.get('/testing-web.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'testing-web.html'));
-});
-
-app.get('/testing-app.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'testing-app.html'));
-});
-
-app.get('/test-mobile.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'test-mobile.html'));
-});
-
-app.get('/test-game.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'test-game.html'));
-});
-
-app.get('/team.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'team.html'));
-});
-
 // ========== 404 HANDLER ==========
+// This catches any routes not handled by static files or API routes
 app.use((req, res) => {
   res.status(404).sendFile(path.join(__dirname, '404.html'));
 });
@@ -694,21 +641,23 @@ app.listen(port, '0.0.0.0', () => {
   console.log(`📊 Database: Render PostgreSQL`);
   console.log(`🌍 Health check: /health`);
   console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log('\n📌 Endpoints:');
-  console.log('   GET  /api/me                - Get current user');
-  console.log('   GET  /api/earnings/:userId  - Get user earnings');
-  console.log('   POST /api/earnings/add      - Add earnings');
+  console.log('\n📌 API Endpoints:');
+  console.log('   GET  /admin/backup-sql?password=xxx  - Download SQL backup');
+  console.log('   GET  /api/me                          - Get current user');
+  console.log('   GET  /api/earnings/:userId            - Get user earnings');
+  console.log('   POST /api/earnings/add                - Add earnings');
   console.log('   GET  /api/user/:userId/earnings-history - Earnings history');
-  console.log('   POST /get-from               - Get app by ID');
-  console.log('   POST /new                    - User signup');
-  console.log('   POST /login                   - User login');
-  console.log('   POST /api/logout              - Logout');
-  console.log('   GET  /users                   - View all users');
-  console.log('   GET  /test                     - View all apps');
-  console.log('   POST /api/test                 - Add new app');
-  console.log('   POST /api/bugs                 - Report bug');
-  console.log('   GET  /api/bugs                 - View all bugs');
-  console.log('   GET  /api/bugs/:appId          - View bugs for app');
-  console.log('   PATCH /api/bugs/:id/status     - Update bug status');
-  console.log('   GET  /api/stats                 - Dashboard stats\n');
+  console.log('   POST /get-from                         - Get app by ID');
+  console.log('   POST /new                               - User signup');
+  console.log('   POST /login                             - User login');
+  console.log('   POST /api/logout                        - Logout');
+  console.log('   GET  /users                             - View all users');
+  console.log('   GET  /test                              - View all apps');
+  console.log('   POST /api/test                          - Add new app');
+  console.log('   POST /api/bugs                          - Report bug');
+  console.log('   GET  /api/bugs                          - View all bugs');
+  console.log('   GET  /api/bugs/:appId                   - View bugs for app');
+  console.log('   PATCH /api/bugs/:id/status              - Update bug status');
+  console.log('   GET  /api/stats                          - Dashboard stats\n');
+  console.log('📄 Static Files: All HTML files served automatically from root directory');
 });
