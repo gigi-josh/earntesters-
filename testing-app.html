@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download App - EarnTesters</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f5f7fa;
+        }
+
+        /* Header */
+        .et-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 15px 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .et-logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .et-logo span {
+            color: #764ba2;
+        }
+
+        .balance {
+            color: #667eea;
+            font-weight: 600;
+            padding: 8px 15px;
+            background: #f0f3ff;
+            border-radius: 20px;
+        }
+
+        /* Main Content */
+        .test-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        /* App Info Card */
+        .app-info-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 30px;
+            color: white;
+        }
+
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin-bottom: 15px;
+            border: 3px solid white;
+        }
+
+        .app-name {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .app-category {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 14px;
+        }
+
+        .app-body {
+            padding: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .info-icon {
+            width: 45px;
+            height: 45px;
+            background: #f0f3ff;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #667eea;
+            font-size: 20px;
+        }
+
+        .info-content {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            word-break: break-word;
+        }
+
+        /* File Info Section */
+        .file-info-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .file-info-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .file-info-header h3 {
+            color: #333;
+        }
+
+        .file-details {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .file-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .file-detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .file-detail-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .file-detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .file-size-large {
+            font-size: 32px;
+            font-weight: bold;
+            color: #764ba2;
+        }
+
+        .size-unit {
+            font-size: 14px;
+            color: #999;
+            font-weight: normal;
+        }
+
+        .download-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .download-btn.android {
+            background: linear-gradient(135deg, #3ddc84, #1a7b4c);
+            color: white;
+        }
+
+        .download-btn.ios {
+            background: linear-gradient(135deg, #000000, #333333);
+            color: white;
+        }
+
+        .download-btn i {
+            font-size: 32px;
+        }
+
+        .download-btn small {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .file-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f3ff;
+            border-radius: 8px;
+            color: #667eea;
+            font-size: 13px;
+        }
+
+        /* Instructions Panel */
+        .instructions-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .instructions-panel h3 {
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions-panel ul {
+            list-style: none;
+        }
+
+        .instructions-panel li {
+            margin-bottom: 10px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .instructions-panel li:before {
+            content: "✓";
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        /* Bug Form */
+        .bug-form {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .bug-form h3 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .severity-options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .severity-option {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .severity-option.low { color: #4caf50; border-color: #4caf50; }
+        .severity-option.medium { color: #ff9800; border-color: #ff9800; }
+        .severity-option.high { color: #f44336; border-color: #f44336; }
+        .severity-option.selected { 
+            background: currentColor; 
+            color: white; 
+        }
+
+        .submit-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #764ba2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .test-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .download-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="et-header">
+        <div class="container">
+            <a href="tester-dash.html" class="et-logo">Earn<span>Testers</span></a>
+            <div class="balance">$42.50</div>
+        </div>
+    </header>
+
+    <div class="test-container">
+        <!-- Left Column -->
+        <div>
+            <!-- App Info Card -->
+            <div class="app-info-card" id="appInfoCard">
+                <div class="app-header">
+                    <div class="app-icon" id="appIcon">📱</div>
+                    <h1 class="app-name" id="appName">Loading...</h1>
+                    <span class="app-category" id="appCategory">Loading...</span>
+                </div>
+                <div class="app-body" id="appBody">
+                    <div class="info-row">
+                        <div class="info-icon">💰</div>
+                        <div class="info-content">
+                            <div class="info-label">Payment</div>
+                            <div class="info-value" id="appPay">Loading...</div>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-icon">📱</div>
+                        <div class="info-content">
+                            <div class="info-label">Platform</div>
+                            <div class="info-value" id="appPlatform">Loading...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File Info Section -->
+            <div class="file-info-section">
+                <div class="file-info-header">
+                    <span style="font-size: 24px;">📦</span>
+                    <h3>App Download</h3>
+                </div>
+                
+                <div class="file-details">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <span class="file-size-large" id="fileSize">47.8</span>
+                        <span class="size-unit">MB</span>
+                        <div style="color: #999; font-size: 13px; margin-top: 5px;">Version 2.1.0</div>
+                    </div>
+                    
+                    <div class="file-detail-row">
+                        <span class="file-detail-label">Format</span>
+                        <span class="file-detail-value">.apk / .ipa</span>
+                    </div>
+                    <div class="file-detail-row">
+                        <span class="file-detail-label">Requires</span>
+                        <span class="file-detail-value">Android 8.0+ / iOS 13.0+</span>
+                    </div>
+                    <div class="file-detail-row">
+                        <span class="file-detail-label">Downloads</span>
+                        <span class="file-detail-value">1,234 ⬇️</span>
+                    </div>
+                </div>
+
+                <div class="download-buttons">
+                    <button class="download-btn android" onclick="downloadApp('android')">
+                        <span style="font-size: 32px;">🤖</span>
+                        <span>Download for Android</span>
+                        <small>APK • 47.8 MB</small>
+                    </button>
+                    
+                    <button class="download-btn ios" onclick="downloadApp('ios')">
+                        <span style="font-size: 32px;">🍎</span>
+                        <span>Download for iOS</span>
+                        <small>IPA • 52.3 MB</small>
+                    </button>
+                </div>
+
+                <div class="file-meta">
+                    <span>🔒 Verified safe</span>
+                    <span>📅 Updated 2 days ago</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div>
+            <!-- Instructions Panel -->
+            <div class="instructions-panel">
+                <h3>📋 Testing Instructions</h3>
+                <ul id="instructionsList">
+                    <li>Download and install the app</li>
+                    <li>Test all features thoroughly</li>
+                    <li>Check for crashes and bugs</li>
+                    <li>Test on different devices</li>
+                    <li>Report any issues found</li>
+                </ul>
+            </div>
+
+            <!-- Bug Report Form -->
+            <div class="bug-form">
+                <h3>🐛 Report a Bug</h3>
+                <div class="form-group">
+                    <label>Bug Title</label>
+                    <input type="text" id="bugTitle" placeholder="e.g., App crashes when opening">
+                </div>
+                <div class="form-group">
+                    <label>Severity</label>
+                    <div class="severity-options">
+                        <div class="severity-option low" onclick="selectSeverity('low')">🐞 Low</div>
+                        <div class="severity-option medium" onclick="selectSeverity('medium')">⚠️ Medium</div>
+                        <div class="severity-option high" onclick="selectSeverity('high')">🔥 High</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="bugDescription" rows="3" placeholder="Describe what happened..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Steps to Reproduce</label>
+                    <textarea id="bugSteps" rows="2" placeholder="1. Open app&#10;2. Click menu&#10;3. App crashes"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Device/Browser</label>
+                    <select id="deviceInfo">
+                        <option>Android Phone</option>
+                        <option>Android Tablet</option>
+                        <option>iPhone</option>
+                        <option>iPad</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <input type="hidden" id="appIdField">
+                <button class="submit-btn" onclick="submitBug()">Submit Bug Report</button>
+            </div>
+        </div>
+    </div>
+    <script src="testing-app.js"></script>
+</body>
+</html>
