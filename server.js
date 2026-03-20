@@ -85,6 +85,26 @@ pool.connect(async (err) => {
 });
 
 // ========== USER ROUTES ==========
+app.get('/', async (req, res) => {
+    // Check if user is logged in
+    const userId = req.cookies.userId;
+    
+    if (userId) {
+        try {
+            const result = await pool.query('SELECT type FROM users WHERE id = $1', [userId]);
+            if (result.rows.length > 0) {
+                // Redirect logged in users to their dashboard
+                const redirectTo = result.rows[0].type === 'Tester' ? 'tester-dash.html' : 'developer-dash.html';
+                return res.redirect(redirectTo);
+            }
+        } catch (err) {
+            console.error('Auth check error:', err);
+        }
+    }
+    
+    // Not logged in, show landing page
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 app.get('/api/me', async (req, res) => {
   const userId = req.cookies.userId;
   if (!userId) return res.status(401).json({ error: 'Not authenticated' });
