@@ -1,344 +1,178 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Testing Environment - EarnTesters</title>
-  <link rel="stylesheet" href="t-environment.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Website - EarnTesters</title>
+    
+    <!-- AdSense Verification Code -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4192056018752882" crossorigin="anonymous"></script>
+    
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;}
+        body{background:#f5f7fa;}
+        .header{background:white;padding:15px 30px;box-shadow:0 2px 10px rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;}
+        .logo{font-size:24px;font-weight:bold;color:#333;text-decoration:none;}
+        .logo span{color:#764ba2;}
+        .header-right{display:flex;align-items:center;gap:20px;}
+        .balance{background:#f0f3ff;color:#764ba2;padding:8px 16px;border-radius:20px;font-weight:600;font-size:14px;}
+        
+        /* Ad Container */
+        .ad-container{max-width:1400px;margin:20px auto;padding:0 20px;}
+        .ad-banner{background:#f9f9f9;border-radius:10px;padding:20px;text-align:center;border:1px solid #e0e0e0;min-height:100px;}
+        
+        /* Main Container */
+        .container{max-width:1400px;margin:20px auto;padding:0 20px;display:grid;grid-template-columns:1fr 350px;gap:30px;}
+        
+        /* Preview Section */
+        .preview-section{background:white;border-radius:15px;overflow:hidden;box-shadow:0 5px 15px rgba(0,0,0,0.05);}
+        .preview-header{padding:20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;}
+        .app-info h2{font-size:20px;color:#333;}
+        .app-info p{color:#666;font-size:14px;}
+        .preview-controls{display:flex;gap:10px;}
+        .control-btn{padding:8px 15px;border:1px solid #ddd;background:white;border-radius:5px;cursor:pointer;}
+        
+        /* Browser Frame */
+        .browser-frame{border:1px solid #e0e0e0;margin:0 20px 20px 20px;border-radius:8px;overflow:hidden;}
+        .browser-header{background:#f5f5f5;padding:10px 15px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #e0e0e0;}
+        .browser-dots{display:flex;gap:6px;}
+        .browser-dot{width:12px;height:12px;border-radius:50%;background:#ddd;}
+        .browser-dot:nth-child(1){background:#ff5f56;}
+        .browser-dot:nth-child(2){background:#ffbd2e;}
+        .browser-dot:nth-child(3){background:#27c93f;}
+        .browser-url{flex:1;background:white;padding:6px 12px;border-radius:20px;font-size:13px;border:1px solid #e0e0e0;}
+        .browser-content{height:500px;background:#fff;}
+        .browser-content iframe{width:100%;height:100%;border:none;}
+        
+        /* Right Column */
+        .right-column{display:flex;flex-direction:column;gap:20px;}
+        .instructions-panel{background:white;border-radius:15px;padding:20px;box-shadow:0 5px 15px rgba(0,0,0,0.05);}
+        .instructions-panel h3{margin-bottom:15px;}
+        .instructions-panel li{margin-bottom:10px;color:#666;list-style:none;}
+        .instructions-panel li:before{content:"✓";color:#4caf50;margin-right:8px;}
+        
+        /* Bug Reporter */
+        .bug-reporter{background:white;border-radius:15px;padding:20px;box-shadow:0 5px 15px rgba(0,0,0,0.05);}
+        .form-group{margin-bottom:15px;}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;}
+        .severity-options{display:flex;gap:8px;margin-bottom:15px;}
+        .severity-option{flex:1;text-align:center;padding:8px;border:1px solid #ddd;border-radius:6px;cursor:pointer;}
+        .severity-option.low{color:#4caf50;border-color:#4caf50;}
+        .severity-option.medium{color:#ff9800;border-color:#ff9800;}
+        .severity-option.high{color:#f44336;border-color:#f44336;}
+        .severity-option.selected.low{background:#4caf50;color:white;}
+        .severity-option.selected.medium{background:#ff9800;color:white;}
+        .severity-option.selected.high{background:#f44336;color:white;}
+        
+        .potential-earnings{background:#e8f5e9;border:1px solid #4caf50;border-radius:6px;padding:10px;margin-bottom:15px;display:flex;justify-content:space-between;}
+        .submit-btn{background:#f44336;color:white;border:none;padding:12px;border-radius:6px;width:100%;cursor:pointer;margin-top:10px;}
+        
+        /* Bugs List */
+        .bugs-list{margin-top:20px;border-top:1px solid #eee;padding-top:15px;}
+        .bug-item{background:#f9f9f9;padding:12px;border-radius:8px;margin-bottom:10px;border-left:3px solid;}
+        .bug-item.high{border-left-color:#f44336;}
+        .bug-item.medium{border-left-color:#ff9800;}
+        .bug-item.low{border-left-color:#4caf50;}
+        .bug-item-header{display:flex;justify-content:space-between;margin-bottom:5px;}
+        .bug-title{font-weight:600;}
+        .bug-status{font-size:11px;padding:2px 8px;border-radius:12px;background:#ff9800;color:white;}
+        .bug-status.approved{background:#4caf50;}
+        .bug-meta{font-size:11px;color:#999;display:flex;gap:15px;margin-top:5px;}
+        .bug-amount{color:#4caf50;font-weight:600;}
+        
+        .app-info-bar{background:#f0f3ff;padding:15px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;}
+        .error-message{background:#ffebee;color:#c62828;padding:40px;text-align:center;border-radius:10px;}
+        @media (max-width:900px){.container{grid-template-columns:1fr;}}
+    </style>
 </head>
 <body>
-    <!-- Ad Banner Overlay -->
-    <div id="adOverlay" class="ad-overlay">
-        <div class="ad-container">
-            <div class="sponsored-badge">SPONSORED</div>
-            <div class="ad-timer" id="timer">35s</div>
-            
-            <!-- Video Ad from VAST -->
-            <video id="vast-video" class="ad-video" autoplay muted playsinline>
-                <source src="https://www.silent-basis.pro/152327/199276/559473_8cefa.mp4" type="video/mp4">
-                <source src="https://www.silent-basis.pro/152327/199276/559473_8cefaz.webm" type="video/webm">
-                Your browser doesn't support video.
-            </video>
-            
-            <button class="ad-skip-btn" id="skipBtn" onclick="skipAd()" disabled>Skip Ad (15s)</button>
+    <header class="header">
+        <a href="/" class="logo">Earn<span>Testers</span></a>
+        <div class="header-right">
+            <span class="balance" id="balance">$0.00</span>
+        </div>
+    </header>
+
+    <div class="ad-container">
+        <div class="ad-banner">
+            <!-- AdSense Ad Unit -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-4192056018752882"
+                 data-ad-slot="1234567890"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content blurred" id="mainContent">
-        <header class="et-header">
-            <div class="container">
-                <a href="dashboard.html" class="et-logo">Earn<span>Testers</span></a>
-                <div class="balance">$42.50</div>
-            </div>
-        </header>
-        
-        <div class="test-container">
-            <!-- Left: Testing Environment -->
-            <div class="testing-area">
-                <div class="testing-header">
-                    <div class="task-info">
-                        <span class="task-badge">Website Testing</span>
-                        <span class="task-title-small">E-commerce Checkout Flow</span>
-                    </div>
-                    <div class="testing-controls">
-                        <button class="control-btn">
-                            <span>🔄</span> Refresh
-                        </button>
-                        <button class="control-btn">
-                            <span>📱</span> Mobile
-                        </button>
-                        <button class="control-btn">
-                            <span>💻</span> Desktop
-                        </button>
-                    </div>
+    <div class="container">
+        <div class="preview-section">
+            <div class="preview-header">
+                <div>
+                    <h2 id="appName">Loading...</h2>
+                    <p id="appType">Website Testing</p>
                 </div>
-                
-                <div class="device-frame">
-                    <!-- Desktop View -->
-                    <div class="device-mockup desktop" id="desktopView">
-                        <div class="mockup-header">
-                            <div class="mockup-dots">
-                                <span class="mockup-dot"></span>
-                                <span class="mockup-dot"></span>
-                                <span class="mockup-dot"></span>
-                            </div>
-                            <div class="mockup-url"></div>
-                        </div>
-                        <div class="mockup-content loading">
-                            <iframe src="https://church-website-qxh5.onrender.com" onload="this.parentNode.classList.remove('loading')" onerror="this.parentNode.classList.add('error')"></iframe>
-                            <button>⛶</button>
-                        </div>
-                    </div>
-                    
-                    <!-- Mobile View (hidden by default) -->
-                    <div class="device-mockup mobile" id="mobileView" style="display: none;">
-                        <div class="mockup-content" style="padding: 10px;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 24px; margin-bottom: 20px;">🛍️</div>
-                                <h3>Mobile Checkout</h3>
-                                <p style="color: #999; font-size: 12px;">Mobile view of the checkout page</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="preview-controls">
+                    <button class="control-btn" onclick="refreshPreview()">🔄</button>
                 </div>
             </div>
-            
-            <!-- Right: Bug Reporter -->
-            <div>
-                <!-- Task Instructions -->
-                <div class="instructions-panel">
-                    <h3>📋 Task Instructions</h3>
-                    <ul>
-                        <li>Test the complete checkout process</li>
-                        <li>Try different payment methods</li>
-                        <li>Test with invalid card details</li>
-                        <li>Check if error messages appear correctly</li>
-                        <li>Verify email confirmation is sent</li>
-                    </ul>
-                    <p style="font-size: 12px; color: #999; margin-top: 10px;">⏱️ Time estimate: 15 minutes</p>
+            <div class="browser-frame">
+                <div class="browser-header">
+                    <div class="browser-dots"><span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span></div>
+                    <div class="browser-url" id="websiteUrl">Loading...</div>
+                </div>
+                <div class="browser-content">
+                    <iframe id="websiteFrame" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="app-info-bar" id="appInfoBar" style="display:none;">
+                <div><h3 id="infoAppName"></h3><p id="infoAppCategory"></p></div>
+                <div class="app-pay" id="infoAppPay"></div>
+            </div>
+
+            <div class="instructions-panel">
+                <h3>📋 Instructions</h3>
+                <ul id="instructionsList"><li>Loading...</li></ul>
+            </div>
+
+            <div class="bug-reporter">
+                <h3>🐛 Report Bug</h3>
+                <input type="hidden" id="appIdField">
+                <div class="potential-earnings"><span>💰 Potential:</span><span id="earningsAmount">$0.00</span></div>
+                
+                <div class="form-group">
+                    <input type="text" id="bugTitle" placeholder="Bug title">
                 </div>
                 
-                <!-- Bug Reporter -->
-                <div class="bug-reporter">
-                    <div class="reporter-header">
-                        <h2>Report a Bug</h2>
-                        <p>Found something wrong? Report it here.</p>
-                    </div>
-                    
-                    <div class="reporter-body">
-                        <!-- Bug Title -->
-                        <div class="bug-form-group">
-                            <label>Bug Title</label>
-                            <input type="text" id="bugTitle" placeholder="e.g., Checkout button not working">
-                        </div>
-                        
-                        <!-- Severity -->
-                        <div class="bug-form-group">
-                            <label>Severity</label>
-                            <div class="severity-options">
-                                <div class="severity-option low" data-severity="low">🐞 Low</div>
-                                <div class="severity-option medium" data-severity="medium">⚠️ Medium</div>
-                                <div class="severity-option high" data-severity="high">🔥 High</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Description -->
-                        <div class="bug-form-group">
-                            <label>Description</label>
-                            <textarea id="bugDescription" rows="3" placeholder="Describe what happened..."></textarea>
-                        </div>
-                        
-                        <!-- Steps to Reproduce -->
-                        <div class="bug-form-group">
-                            <label>Steps to Reproduce</label>
-                            <textarea id="bugSteps" rows="2" placeholder="1. Go to checkout\n2. Enter card details\n3. Click pay"></textarea>
-                        </div>
-                        
-                        <!-- Screenshot Upload -->
-                        <div class="bug-form-group">
-                            <label>Screenshot (optional)</label>
-                            <div class="upload-area" onclick="document.getElementById('screenshot').click()">
-                                <input type="file" id="screenshot" accept="image/*">
-                                <div class="upload-icon">📸</div>
-                                <div class="upload-text">Click to upload screenshot</div>
-                                <div class="upload-hint">PNG, JPG up to 5MB</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Browser/Device Info -->
-                        <div class="bug-form-group">
-                            <label>Device/Browser</label>
-                            <select id="deviceInfo">
-                                <option>Chrome - Windows</option>
-                                <option>Firefox - Windows</option>
-                                <option>Safari - Mac</option>
-                                <option>Chrome - Android</option>
-                                <option>Safari - iPhone</option>
-                                <option>Other</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Submitted Bugs List -->
-                        <div class="submitted-bugs">
-                            <h3>Your Submitted Bugs</h3>
-                            
-                            <div class="bug-item high">
-                                <div class="bug-item-header">
-                                    <span class="bug-title">Payment fails with valid card</span>
-                                    <span class="bug-severity">🔥 High</span>
-                                </div>
-                                <div class="bug-description-preview">Error message appears after clicking pay...</div>
-                                <div class="bug-meta">
-                                    <span>2 min ago</span>
-                                    <span>Pending review</span>
-                                </div>
-                            </div>
-                            
-                            <div class="bug-item medium">
-                                <div class="bug-item-header">
-                                    <span class="bug-title">Cart total not updating</span>
-                                    <span class="bug-severity">⚠️ Medium</span>
-                                </div>
-                                <div class="bug-description-preview">When removing item, total stays same...</div>
-                                <div class="bug-meta">
-                                    <span>15 min ago</span>
-                                    <span>Pending review</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="reporter-footer">
-                        <button class="submit-bug-btn" onclick="submitBug()">Submit Bug Report</button>
-                        <button class="complete-task-btn" onclick="completeTask()">Complete Testing Task</button>
-                    </div>
+                <div class="severity-options">
+                    <div class="severity-option low" onclick="selectSeverity('low', this)">🐞 $1</div>
+                    <div class="severity-option medium" onclick="selectSeverity('medium', this)">⚠️ $2.50</div>
+                    <div class="severity-option high" onclick="selectSeverity('high', this)">🔥 $5</div>
+                </div>
+                
+                <div class="form-group">
+                    <textarea id="bugDescription" rows="2" placeholder="Description"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <textarea id="bugSteps" rows="2" placeholder="Steps"></textarea>
+                </div>
+                
+                <button class="submit-btn" onclick="submitBug()">Submit Bug</button>
+                
+                <div class="bugs-list" id="bugsList">
+                    <h4>Your Bugs</h4>
+                    <div style="text-align:center;color:#999;">No bugs yet</div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <script>
-        // Ad Timer Logic
-        let timeLeft = 35; // 35 seconds duration from VAST
-        let skipEnabled = false;
-        const timerElement = document.getElementById('timer');
-        const skipBtn = document.getElementById('skipBtn');
-        const adOverlay = document.getElementById('adOverlay');
-        const mainContent = document.getElementById('mainContent');
-        const video = document.getElementById('vast-video');
-        
-        // Countdown timer
-        const timer = setInterval(() => {
-            timeLeft--;
-            timerElement.textContent = timeLeft + 's';
-            
-            // Enable skip button after 15 seconds (as per VAST skipoffset)
-            if (timeLeft === 20) { // 35-15 = 20 seconds remaining
-                skipEnabled = true;
-                skipBtn.disabled = false;
-                skipBtn.classList.add('enabled');
-                timerElement.classList.add('timer-pulse');
-            }
-            
-            // Update skip button text
-            if (timeLeft <= 20 && timeLeft > 0) {
-                skipBtn.textContent = `Skip Ad (${timeLeft - 20}s)`;
-            }
-            
-            // When timer reaches 0
-            if (timeLeft <= 0) {
-                clearInterval(timer);
-                closeAd();
-            }
-        }, 1000);
-        
-        // When video ends naturally
-        video.addEventListener('ended', function() {
-            closeAd();
-        });
-        
-        // Skip ad function
-        function skipAd() {
-            if (skipEnabled) {
-                closeAd();
-            }
-        }
-        
-        // Close ad and show main content
-        function closeAd() {
-            video.pause();
-            adOverlay.style.animation = 'fadeIn 0.3s ease reverse';
-            setTimeout(() => {
-                adOverlay.style.display = 'none';
-                mainContent.classList.remove('blurred');
-            }, 300);
-        }
-        
-        // Prevent clicking on main content while ad is showing
-        document.addEventListener('click', function(e) {
-            if (!adOverlay.style.display || adOverlay.style.display !== 'none') {
-                if (!e.target.closest('.ad-container')) {
-                    // Optional: Show message that ad must complete
-                }
-            }
-        }, true);
-        
-        // Toggle between device views
-        document.querySelectorAll('.control-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const text = this.textContent;
-                
-                if (text.includes('Mobile')) {
-                    document.getElementById('desktopView').style.display = 'none';
-                    document.getElementById('mobileView').style.display = 'block';
-                } else if (text.includes('Desktop')) {
-                    document.getElementById('desktopView').style.display = 'block';
-                    document.getElementById('mobileView').style.display = 'none';
-                }
-            });
-        });
-        
-        // Severity selection
-        document.querySelectorAll('.severity-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.severity-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                });
-                this.classList.add('selected');
-            });
-        });
-        
-        // Submit bug function
-        function submitBug() {
-            const title = document.getElementById('bugTitle').value;
-            if (!title) {
-                alert('Please enter a bug title');
-                return;
-            }
-            
-            alert('Bug submitted successfully! It will be reviewed within 24 hours.');
-            
-            // Clear form
-            document.getElementById('bugTitle').value = '';
-            document.getElementById('bugDescription').value = '';
-            document.getElementById('bugSteps').value = '';
-        }
-        
-        // Complete task function
-        function completeTask() {
-            if (confirm('Are you sure you want to complete this task? You cannot submit more bugs after completing.')) {
-                alert('Task completed! Your earnings will be added to your balance within 48 hours.');
-                window.location.href = 'dashboard.html';
-            }
-        }
-        
-        // File upload preview
-        document.getElementById('screenshot').addEventListener('change', function(e) {
-            if (this.files && this.files[0]) {
-                const fileName = this.files[0].name;
-                const uploadArea = document.querySelector('.upload-area');
-                uploadArea.innerHTML = `
-                    <div class="upload-icon">✅</div>
-                    <div class="upload-text">${fileName}</div>
-                    <div class="upload-hint">Click to change</div>
-                `;
-            }
-        });
-        
-        // Mockup URL and preview
-        const mockup = document.querySelector('.mockup-content');
-        const url = document.querySelector('.mockup-content iframe');
-        const previewBtn = document.querySelector('.mockup-content button');
-        const mockupUrl = document.querySelector('.mockup-url');
-        
-        if (url && mockupUrl) {
-            mockupUrl.textContent = url.src;
-        }
-        
-        if (previewBtn) {
-            previewBtn.onclick = () => mockup.classList.toggle('landscape');
-        }
-    </script>
+    <script src="testing-website.js"></script>
 </body>
 </html>
