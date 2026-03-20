@@ -3,150 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EarnTesters - Available Testing Tasks</title>
+    <title>EarnTesters - Available Tasks</title>
     <style>
-        /* EarnTesters Specific Styles */
-        :root {
-            --et-primary: #764ba2;
-            --et-secondary: cornflowerblue;
-        }
-        
-        body {
-            background: #f8fafc;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
-        
+
+        body {
+            background: #f5f7fa;
+        }
+
         /* Header */
-        .et-header {
+        .header {
             background: white;
+            padding: 15px 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            padding: 10px 0;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        .et-header .container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .header-top {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
-        .et-logo {
+
+        .logo {
             font-size: 24px;
             font-weight: bold;
             color: #333;
             text-decoration: none;
         }
-        
-        .et-logo span {
+
+        .logo span {
             color: #764ba2;
         }
-        
-        .balance {
-            color: cornflowerblue;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-        
-        .et-nav {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-        
-        .et-nav a {
-            text-decoration: none;
-            color: #555;
-            font-weight: 500;
-            white-space: nowrap;
-        }
-        
-        .et-nav a:hover {
-            color: var(--et-primary);
-        }
-        
-        .avatar {
-            min-width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--et-primary), var(--et-secondary));
-            border-radius: 50%;
+
+        .header-right {
             display: flex;
             align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            text-decoration: none;
-        }
-        
-        /* Main Layout */
-        .et-main {
-            padding: 40px 0;
-        }
-        
-        .et-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* Welcome Section */
-        .welcome-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
             gap: 20px;
         }
-        
+
+        .balance {
+            background: #f0f3ff;
+            color: #764ba2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logout-btn:hover {
+            background: #d32f2f;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* Welcome Section */
+        .welcome {
+            margin-bottom: 30px;
+        }
+
         .welcome h1 {
             font-size: 28px;
-            margin-bottom: 5px;
             color: #333;
+            margin-bottom: 5px;
         }
-        
+
         .welcome p {
             color: #666;
         }
-        
-        .quick-stats {
-            display: flex;
+
+        /* Stats Cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
+            margin-bottom: 30px;
         }
-        
-        .stat-badge {
+
+        .stat-card {
             background: white;
-            padding: 10px 20px;
+            padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             text-align: center;
         }
-        
-        .stat-badge .number {
-            font-size: 24px;
+
+        .stat-number {
+            font-size: 28px;
             font-weight: bold;
-            color: var(--et-primary);
+            color: #764ba2;
+            margin-bottom: 5px;
         }
-        
-        .stat-badge .label {
-            font-size: 12px;
-            color: #999;
+
+        .stat-label {
+            color: #666;
+            font-size: 13px;
         }
-        
+
         /* Filter Bar */
         .filter-bar {
             background: white;
@@ -157,9 +133,9 @@
             gap: 15px;
             flex-wrap: wrap;
             align-items: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        
+
         .filter-select {
             padding: 10px 15px;
             border: 1px solid #e0e0e0;
@@ -168,47 +144,61 @@
             min-width: 150px;
             background: white;
         }
-        
+
         .search-box {
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            gap: 10px;
             flex: 1;
+            display: flex;
+            gap: 10px;
         }
-        
+
         .search-box input {
+            flex: 1;
             padding: 10px 15px;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             font-size: 14px;
-            width: 100%;
-            box-sizing: border-box;
         }
-        
-        .filter-button {
-            background: var(--et-primary);
+
+        .filter-btn {
+            background: #764ba2;
             color: white;
             border: none;
             padding: 10px 25px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            width: 100px;
         }
-        
-        .filter-button:hover {
+
+        .filter-btn:hover {
             opacity: 0.9;
         }
-        
+
         /* Tasks Grid */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h2 {
+            font-size: 20px;
+            color: #333;
+        }
+
+        .view-all {
+            color: #764ba2;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         .tasks-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
             margin-bottom: 40px;
         }
-        
+
         .task-card {
             background: white;
             border-radius: 12px;
@@ -217,247 +207,143 @@
             transition: transform 0.2s;
             border: 1px solid #f0f0f0;
         }
-        
+
         .task-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        
+
         .task-header {
-            padding: 20px;
+            padding: 15px;
             border-bottom: 1px solid #f0f0f0;
             display: flex;
             justify-content: space-between;
             align-items: start;
         }
-        
+
         .task-category {
             background: #f0e6fa;
-            color: var(--et-primary);
+            color: #764ba2;
             padding: 4px 10px;
             border-radius: 15px;
             font-size: 12px;
             font-weight: 600;
         }
-        
+
         .task-pay {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: bold;
-            color: var(--et-primary);
+            color: #764ba2;
         }
-        
-        .task-pay small {
-            font-size: 14px;
-            color: #999;
-            font-weight: normal;
-        }
-        
+
         .task-body {
-            padding: 20px;
+            padding: 15px;
         }
-        
+
         .task-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             margin-bottom: 10px;
             color: #333;
-        }
-        
-        .task-description {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        
-        .task-meta {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #888;
-            flex-wrap: wrap;
-        }
-        
-        .task-meta span {
             display: flex;
             align-items: center;
             gap: 5px;
         }
-        
+
+        .url-indicator {
+            background: #4caf50;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 12px;
+        }
+
+        .task-description {
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #888;
+            flex-wrap: wrap;
+        }
+
         .task-footer {
-            padding: 15px 20px;
+            padding: 15px;
             background: #fafafa;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid #f0f0f0;
         }
-        
+
         .spots-left {
-            font-size: 13px;
+            font-size: 12px;
             color: #666;
         }
-        
+
         .spots-left strong {
-            color: var(--et-primary);
+            color: #764ba2;
         }
-        
+
         .task-button {
-            background: var(--et-primary);
+            background: #764ba2;
             color: white;
             border: none;
-            padding: 8px 20px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            font-size: 14px;
+            font-size: 13px;
             text-decoration: none;
         }
-        
+
         .task-button:hover {
             opacity: 0.9;
         }
-        
-        .task-button.secondary {
-            background: transparent;
-            color: var(--et-primary);
-            border: 1px solid var(--et-primary);
-        }
-.url-indicator {
-    display: inline-block;
-    background: #4CAF50;
-    color: white;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 12px;
-    margin-left: 8px;
-    vertical-align: middle;
-}
 
-.loading-indicator {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 40px;
-    color: #666;
-    font-size: 16px;
-}
-
-.error-message {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 40px;
-    color: #dc3545;
-    font-size: 16px;
-    background: #fff;
-    border-radius: 8px;
-    border: 1px solid #f5c6cb;
-}
-
-.no-tasks {
-    grid-column: 1 / -1;
-    text-align: center;
-    padding: 40px;
-    color: #666;
-    font-size: 16px;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.task-description {
-    white-space: pre-line;
-}
-
-.refresh-button {
-    background: transparent;
-    border: 1px solid var(--et-primary);
-    color: var(--et-primary);
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 12px;
-    margin-left: 10px;
-}
-
-.refresh-button:hover {
-    background: var(--et-primary);
-    color: white;
-}
-        
         /* Featured Section */
         .featured-section {
             margin-bottom: 40px;
         }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .section-header h2 {
-            font-size: 20px;
-            color: #333;
-        }
-        
-        .view-all {
-            color: var(--et-primary);
-            text-decoration: none;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        /* Loading States */
-        .loading-indicator {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 16px;
-        }
-        
-        .error-message {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            color: #dc3545;
-            font-size: 16px;
-        }
-        
-        .no-tasks {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            font-size: 16px;
-        }
-        
-        /* How it works */
+
+        /* How It Works */
         .how-it-works {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 30px;
             margin-top: 30px;
             border: 1px solid #f0f0f0;
         }
-        
+
         .how-it-works h3 {
             margin-bottom: 20px;
             color: #333;
+            font-size: 18px;
         }
-        
-        .step-item {
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .step {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
         }
-        
+
         .step-number {
             width: 30px;
             height: 30px;
             background: #f0e6fa;
-            color: var(--et-primary);
+            color: #764ba2;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -465,44 +351,64 @@
             font-weight: bold;
             flex-shrink: 0;
         }
-        
+
         .step-text h4 {
-            font-size: 16px;
+            font-size: 15px;
             margin-bottom: 5px;
             color: #333;
         }
-        
+
         .step-text p {
-            font-size: 14px;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Loading States */
+        .loading {
+            text-align: center;
+            padding: 40px;
             color: #666;
         }
-        
-        footer {
+
+        .error {
             text-align: center;
-            background: linear-gradient(90deg, cornflowerblue, #764ba2);
-            color: white;
-            font-weight: bold;
-            padding: 20px 0;
+            padding: 40px;
+            color: #f44336;
+            background: #ffebee;
+            border-radius: 8px;
         }
-        
-        /* Responsive */
+
+        .no-tasks {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 0;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+
         @media (max-width: 768px) {
-            .welcome-section {
-                flex-direction: column;
-                align-items: start;
+            .stats {
+                grid-template-columns: repeat(2, 1fr);
             }
             
-            .quick-stats {
-                width: 100%;
-            }
-            
-            .stat-badge {
-                flex: 1;
+            .steps {
+                grid-template-columns: 1fr;
             }
             
             .filter-bar {
                 flex-direction: column;
-                align-items: stretch;
             }
             
             .search-box {
@@ -516,128 +422,124 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="et-header">
-        <div class="container">
-            <div class="header-top">
-                <a href="tester.html" class="et-logo">Earn<span>Testers</span></a>
-                <div class="balance" id="user-balance">$42.50</div>
-            </div>
-            <nav class="et-nav">
-                <a href="dashboard.html">Browse Tasks</a>
-                <a href="my-tasks.html">My Tasks</a>
-                <a href="earnings.html">Earnings</a>
-                <a href="profile.html" class="avatar">J</a>
-            </nav>
+    <header class="header">
+        <a href="/" class="logo">Earn<span>Testers</span></a>
+        <div class="header-right">
+            <span class="balance">$42.50</span>
+            <button class="logout-btn" onclick="logout()">
+                <span>🚪</span> Logout
+            </button>
         </div>
     </header>
-    
-    <!-- Main Content -->
-    <main class="et-main">
-        <div class="et-container">
-            <!-- Welcome Section -->
-            <div class="welcome-section">
-                <div class="welcome">
-                    <h1>Available Testing Tasks</h1>
-                    <p>Find bugs, test features, earn money</p>
-                </div>
-                
-                <div class="quick-stats">
-                    <div class="stat-badge">
-                        <div class="number" id="available-count">0</div>
-                        <div class="label">Available</div>
-                    </div>
-                    <div class="stat-badge">
-                        <div class="number" id="testers-online">143</div>
-                        <div class="label">Testers Online</div>
-                    </div>
-                </div>
+
+    <div class="container">
+        <!-- Welcome Section -->
+        <div class="welcome">
+            <h1>Available Testing Tasks</h1>
+            <p>Find bugs, test features, and earn money</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="availableCount">0</div>
+                <div class="stat-label">Available Tasks</div>
             </div>
-            
-            <!-- Filter Bar -->
-            <div class="filter-bar">
-                <select class="filter-select" id="category-filter">
-                    <option>All Categories</option>
-                    <option>Website Testing</option>
-                    <option>Mobile App</option>
-                    <option>Game Testing</option>
-                    <option>UI/UX Feedback</option>
-                </select>
-                
-                <select class="filter-select" id="device-filter">
-                    <option>Any Device</option>
-                    <option>Desktop</option>
-                    <option>Mobile</option>
-                    <option>Android</option>
-                    <option>iPhone</option>
-                    <option>Tablet</option>
-                </select>
-                
-                <select class="filter-select" id="sort-filter">
-                    <option>Sort by: Newest</option>
-                    <option>Highest Pay</option>
-                    <option>Most Spots Left</option>
-                </select>
-                
-                <div class="search-box">
-                    <input type="text" id="search-input" placeholder="Search tasks (min 3 characters)...">
-                    <button class="filter-button" id="filter-btn">Filter</button>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number" id="completedCount">12</div>
+                <div class="stat-label">Completed</div>
             </div>
-            
-            <!-- Featured Tasks Section -->
-            <div class="featured-section">
-                <div class="section-header">
-                    <h2>⭐ Featured Tasks</h2>
-                    <a href="#" class="view-all" onclick="showAllFeatured()">View all →</a>
-                </div>
-                
-                <div class="tasks-grid" id="featured-tasks-grid">
-                    <div class="loading-indicator">Loading featured tasks...</div>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number" id="earnedTotal">$42.50</div>
+                <div class="stat-label">Total Earned</div>
             </div>
+            <div class="stat-card">
+                <div class="stat-number" id="testersOnline">143</div>
+                <div class="stat-label">Testers Online</div>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <select class="filter-select" id="categoryFilter">
+                <option>All Categories</option>
+                <option>Mobile App</option>
+                <option>Website</option>
+                <option>Game</option>
+                <option>Web App</option>
+            </select>
             
-            <!-- Regular Tasks Section -->
+            <select class="filter-select" id="deviceFilter">
+                <option>Any Device</option>
+                <option>Android</option>
+                <option>iOS</option>
+                <option>Desktop</option>
+            </select>
+            
+            <select class="filter-select" id="sortFilter">
+                <option>Newest First</option>
+                <option>Highest Pay</option>
+                <option>Most Spots</option>
+            </select>
+            
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search tasks...">
+                <button class="filter-btn" id="filterBtn">Filter</button>
+            </div>
+        </div>
+
+        <!-- Featured Tasks -->
+        <div class="featured-section">
             <div class="section-header">
-                <h2>📋 All Available Tasks</h2>
+                <h2>⭐ Featured Tasks</h2>
+                <span class="view-all" onclick="showAllTasks()">View all →</span>
             </div>
-            
-            <div class="tasks-grid" id="all-tasks-grid">
-                <div class="loading-indicator">Loading tasks...</div>
+            <div class="tasks-grid" id="featuredGrid">
+                <div class="loading">Loading featured tasks...</div>
             </div>
-            
-            <!-- How it works -->
-            <div class="how-it-works">
-                <h3>How it works</h3>
-                <div class="step-item">
+        </div>
+
+        <!-- All Tasks -->
+        <div class="section-header">
+            <h2>📋 All Tasks</h2>
+        </div>
+        <div class="tasks-grid" id="allTasksGrid">
+            <div class="loading">Loading tasks...</div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="how-it-works">
+            <h3>How It Works</h3>
+            <div class="steps">
+                <div class="step">
                     <div class="step-number">1</div>
                     <div class="step-text">
-                        <h4>Choose a task</h4>
-                        <p>Browse available testing tasks that match your skills and devices</p>
+                        <h4>Choose a Task</h4>
+                        <p>Browse available testing tasks that match your skills</p>
                     </div>
                 </div>
-                <div class="step-item">
+                <div class="step">
                     <div class="step-number">2</div>
                     <div class="step-text">
-                        <h4>Complete testing</h4>
-                        <p>Follow the test cases and report any bugs or issues you find</p>
+                        <h4>Test & Find Bugs</h4>
+                        <p>Test the app and report any bugs you discover</p>
                     </div>
                 </div>
-                <div class="step-item">
+                <div class="step">
                     <div class="step-number">3</div>
                     <div class="step-text">
-                        <h4>Get paid</h4>
-                        <p>Earn money for each valid bug report or completed task</p>
+                        <h4>Get Paid</h4>
+                        <p>Earn money for each valid bug report</p>
                     </div>
                 </div>
             </div>
         </div>
-    </main>
-    
-    <footer>
-        &copy; 2026 JoshGG. All rights reserved 
+    </div>
+
+    <footer class="footer">
+        © 2026 EarnTesters. All rights reserved.
     </footer>
-    
+
     <script src="tester-dash.js"></script>
 </body>
 </html>
